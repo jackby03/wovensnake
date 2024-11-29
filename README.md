@@ -4,9 +4,10 @@
 ---
 
 ## **Features**  
-- **Simplified Configuration**: Manage dependencies using a JSON/YAML-based configuration file for development, production, and release environments.  
+- **Simplified Configuration**: Manage dependencies using a JSON/YAML-based configuration file (`wovenpkg.json`) for development, production, and release environments.  
 - **Rust-Powered Performance**: Enjoy lightning-fast operations and reliability powered by Rust.  
 - **Snake_Island Concept**: Isolate packages and their dependencies, keeping them modular and conflict-free.  
+- **Work Directory Management**: Like Node’s `node_modules` or Python’s `venv`, manage your dependencies in isolated work directories for better organization and efficiency.  
 - **Future-Proof Design**: Planned features like *Bridge_Snake* to connect shared dependencies efficiently and reduce redundancy.
 
 ---
@@ -30,21 +31,22 @@ cargo install wovensnake
 ```
 
 ### **2. Initialize Your Project**  
-Run the following command in your project directory to create a `wovensnake.json` configuration file:  
+Run the following command in your project directory to create a `wovenpkg.json` configuration file:  
 ```bash
 wovensnake init
 ```
 
 ### **3. Install Dependencies**  
-Add your dependencies to `wovensnake.json` and install them with:  
+Add your dependencies to `wovenpkg.json` and install them with:  
 ```bash
 wovensnake install
 ```
+Dependencies will be installed into a dedicated work directory (similar to `venv` in Python or `node_modules` in Node), ensuring isolation and reducing conflicts.
 
 ---
 
 ## **Configuration**  
-WovenSnake uses a JSON or YAML file to define dependencies. Here's an example of a basic `wovensnake.json` file:  
+**WovenSnake** uses a `wovenpkg.json` file to define dependencies. Here's an example of a basic `wovenpkg.json` file:  
 ```json
 {
   "name": "my-python-project",
@@ -69,9 +71,10 @@ WovenSnake uses a JSON or YAML file to define dependencies. Here's an example of
 ---
 
 ## **Why WovenSnake?**  
-Unlike traditional package managers, WovenSnake offers:  
+Unlike traditional package managers, **WovenSnake** offers:  
 - A fresh perspective on managing Python dependencies with modular and creative concepts.  
 - Rust-based performance for faster and more reliable operations.  
+- Work directory management, similar to `venv` or `node_modules`, for better dependency isolation.  
 - A clear focus on reducing complexity and promoting scalability in large projects.
 
 ---
