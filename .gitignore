@@ -1,0 +1,24 @@
+# Compiled Rust files
+/target/
+
+# Rust dependencies
+/Cargo.lock
+
+# VS Code settings folder
+.vscode/
+
+# System files (macOS)
+.DS_Store
+
+# System files (Windows)
+Thumbs.db
+
+# IDE files
+.idea/
+
+# Node modules (if applicable for any front-end work)
+node_modules/
+
+# Generated files
+*.log
+*.tmp
