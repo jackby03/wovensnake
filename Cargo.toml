@@ -26,8 +26,7 @@ default = ["logging"]
 members = ["src/*"]
 
 [package.metadata]
-# Metadatos personalizados, como la URL del repositorio
-repository = "https://github.com/yourusername/wovensnake"
+repository = "https://github.com/jackby03/wovensnake"
 
 [profile.dev]
 opt-level = 0
