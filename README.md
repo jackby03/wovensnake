@@ -25,23 +25,39 @@ This script will:
 - Download the latest version of **WovenSnake** from the repository.  
 - Build and install it on your system automatically.  
 
-For manual installation using `cargo` (if preferred):  
-```bash
-cargo install wovensnake
-```
-
 ### **2. Initialize Your Project**  
 Run the following command in your project directory to create a `wovenpkg.json` configuration file:  
 ```bash
 wovensnake init
 ```
-
+```sh
+/YourProject
+├── .venv
+├── src
+│   └── main.py
+├── wovenpkg.json
+└── .gitignore
+```
 ### **3. Install Dependencies**  
 Add your dependencies to `wovenpkg.json` and install them with:  
 ```bash
-wovensnake install
+woven install
 ```
 Dependencies will be installed into a dedicated work directory (similar to `venv` in Python or `node_modules` in Node), ensuring isolation and reducing conflicts.
+
+### **4. Update Dependencies**  
+To update your dependencies to their latest versions as specified in `wovenpkg.json`, run:  
+```bash
+woven update
+```
+This command will fetch and install the latest versions of your dependencies, keeping your project up-to-date.
+
+### **5. Clean Dependencies**  
+To remove unused dependencies and clean up your work directory, use:  
+```bash
+woven clean
+```
+This command will help maintain a tidy and efficient work environment by removing unnecessary files.
 
 ---
 
@@ -51,16 +67,13 @@ Dependencies will be installed into a dedicated work directory (similar to `venv
 {
   "name": "my-python-project",
   "version": "1.0.0",
+  "python_version": "3.10",
   "dependencies": {
-    "requests": ">=2.26.0",
-    "numpy": "^1.21.0"
-  },
-  "devDependencies": {
-    "pytest": "^7.0.0"
+    "requests": "2.26.0",
+    "numpy": "1.21.0"
   }
 }
 ```
-
 ---
 
 ## **Planned Features**  
