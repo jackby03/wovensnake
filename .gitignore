@@ -25,5 +25,8 @@ node_modules/
 
 /packages
 /venv
-
-errors.*
+build*
+*errors.*
+status.*
+wovenpkg.lock
+err*
