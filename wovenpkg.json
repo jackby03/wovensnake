@@ -6,7 +6,8 @@
     "requests": "2.26.0",
     "numpy": "1.21.0",
     "pytest": "7.0.0",
-    "black": "22.0.0"
+    "black": "22.3.0",
+    "atomicwrites": "1.4.0"
   },
-  "virtualEnviroment": "venv"
+  "virtualEnvironment": "venv"
 }

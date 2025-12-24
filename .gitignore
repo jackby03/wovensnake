@@ -22,3 +22,6 @@ node_modules/
 # Generated files
 *.log
 *.tmp
+
+/packages
+/venv
