@@ -19,6 +19,12 @@ pub async fn execute() -> Result<(), Box<dyn Error>> {
     }
 
     let venv_base = Path::new(&config.virtual_environment);
+    
+    // Automatic venv creation
+    if !venv_base.exists() {
+        crate::core::venv::create_venv(venv_base)?;
+    }
+
     let site_packages = if cfg!(windows) {
         venv_base.join("Lib").join("site-packages")
     } else {
@@ -108,10 +114,54 @@ async fn install_from_lock(
             package::extract_targz(&dest_path, site_packages)?;
         }
 
-        pb.finish_with_message(format!("\x1b[32m✓\x1b[0m {}", name));
+    pb.finish_with_message(format!("\x1b[32m✓\x1b[0m {}", name));
         count += 1;
     }
+
+    // PRUNING: Remove packages NOT in lockfile
+    prune_unused_packages(site_packages, lockfile, multi)?;
+
     Ok(count)
+}
+
+fn prune_unused_packages(site_packages: &Path, lockfile: &Lockfile, multi: &MultiProgress) -> Result<(), Box<dyn Error>> {
+    let pb = multi.add(ProgressBar::new_spinner());
+    pb.set_style(ProgressStyle::default_spinner().template("{spinner:.red} {msg}")?.tick_chars("⠁⠂⠄⡀⢀⠠⠐⠈"));
+    pb.set_message("Pruning unused packages...");
+
+    let protected = vec!["pip", "setuptools", "pkg_resources", "_distutils_hack", "wheel"];
+    
+    if let Ok(entries) = std::fs::read_dir(site_packages) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let name = entry.file_name().to_string_lossy().to_string();
+            
+            let pkg_base_name = if name.ends_with(".dist-info") {
+                name.split('-').next().unwrap_or("").to_lowercase().replace('-', "_")
+            } else if !name.contains('.') && path.is_dir() {
+                name.to_lowercase().replace('-', "_")
+            } else {
+                continue;
+            };
+
+            if protected.contains(&pkg_base_name.as_str()) {
+                continue;
+            }
+
+            // Check if it's in lockfile (we need to be careful with naming)
+            let in_lock = lockfile.packages.keys().any(|k| k.to_lowercase().replace('-', "_") == pkg_base_name);
+            
+            if !in_lock {
+                if path.is_dir() {
+                    std::fs::remove_dir_all(&path)?;
+                } else {
+                    std::fs::remove_file(&path)?;
+                }
+            }
+        }
+    }
+    pb.finish_and_clear();
+    Ok(())
 }
 
 async fn install_and_resolve(

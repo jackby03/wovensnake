@@ -35,7 +35,9 @@ async fn main() {
             }
         }
         Commands::Update => {
-            println!("Update command not yet implemented.");
+            if let Err(e) = cli::update::execute().await {
+                eprintln!("Error during update: {}", e);
+            }
         }
     }
 }
