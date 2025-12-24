@@ -9,6 +9,10 @@ pub struct Cache {
 
 
 impl Cache {
+    pub fn new(base_dir: PathBuf) -> Self {
+        Self { base_dir }
+    }
+
     pub fn init() -> Result<Self, Box<dyn Error>> {
         let home = dirs::home_dir().ok_or("Could not find home directory")?;
         let cache_dir = home.join(".wovensnake").join("cache");
@@ -17,7 +21,7 @@ impl Cache {
             fs::create_dir_all(&cache_dir)?;
         }
         
-        Ok(Self { base_dir: cache_dir })
+        Ok(Self::new(cache_dir))
     }
 
     pub fn get_pkg_path(&self, filename: &str, sha256: &str) -> PathBuf {
