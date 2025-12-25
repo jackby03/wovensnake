@@ -6,7 +6,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::core::python;
 
-pub fn create_venv(path: &Path, python_version: &str) -> Result<(), Box<dyn Error>> {
+pub async fn create_venv(path: &Path, python_version: &str) -> Result<(), Box<dyn Error>> {
     let pb = ProgressBar::new_spinner();
     pb.set_style(
         ProgressStyle::default_spinner()
@@ -16,7 +16,7 @@ pub fn create_venv(path: &Path, python_version: &str) -> Result<(), Box<dyn Erro
     pb.set_message(format!("Creating virtual environment in {}...", path.display()));
 
     // Find the correct python executable
-    let python_exe = python::find_python_executable(python_version)?;
+    let python_exe = python::find_python_executable(python_version).await?;
     let version_output = Command::new(&python_exe).arg("-V").output()?;
     let version_str = String::from_utf8_lossy(&version_output.stdout);
     pb.set_message(format!(
