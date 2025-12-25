@@ -8,6 +8,7 @@ use std::path::Path;
 pub struct Lockfile {
     pub name: String,
     pub version: String,
+    pub python_version: String,
     pub packages: HashMap<String, LockedPackage>,
 }
 
@@ -29,10 +30,11 @@ pub struct Artifact {
 }
 
 impl Lockfile {
-    pub fn new(name: &str, version: &str) -> Self {
+    pub fn new(name: &str, version: &str, python_version: &str) -> Self {
         Self {
             name: name.to_string(),
             version: version.to_string(),
+            python_version: python_version.to_string(),
             packages: HashMap::new(),
         }
     }

@@ -36,3 +36,28 @@ pub async fn find_python_executable(expected: &str) -> Result<String, Box<dyn Er
     let managed_exe = crate::core::python_manager::ensure_python_version(expected).await?;
     Ok(managed_exe.to_string_lossy().to_string())
 }
+
+/// Attempts to detect the system's default Python version (major.minor).
+pub fn get_system_python_version() -> Option<String> {
+    let commands = ["python", "python3"];
+    for cmd in commands {
+        if let Ok(output) = Command::new(cmd).arg("--version").output() {
+            if output.status.success() {
+                let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+                let version_str = if stdout.is_empty() { stderr } else { stdout };
+
+                // version_str is usually "Python 3.10.12"
+                let parts: Vec<&str> = version_str.split_whitespace().collect();
+                if parts.len() >= 2 {
+                    let version_num = parts[1];
+                    let version_parts: Vec<&str> = version_num.split('.').collect();
+                    if version_parts.len() >= 2 {
+                        return Some(format!("{}.{}", version_parts[0], version_parts[1]));
+                    }
+                }
+            }
+        }
+    }
+    None
+}
