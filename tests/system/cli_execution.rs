@@ -15,15 +15,16 @@ fn test_cli_system_flow_init() {
     assert!(status.success());
     
     // Current CWD is project root. 
-    // We can run 'wovensnake init' but it would overwrite our current folder.
+    // We can run 'woven init' but it would overwrite our current folder.
     // Dangerous.
     //
     // WovenSnake assumes CWD.
     // To test System level safely, we must spawn a process with current_dir set to temp.
     
     // We need the path to the executable.
+    let exe_name = if cfg!(windows) { "woven.exe" } else { "woven" };
     let exe_path = std::env::current_dir().unwrap()
-        .join("target").join("debug").join("wovensnake.exe"); // Windows extension
+        .join("target").join("debug").join(exe_name);
         
     if !exe_path.exists() {
          // Fallback or skip

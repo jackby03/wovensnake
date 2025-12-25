@@ -21,7 +21,7 @@ pub fn execute(args: &[String]) -> Result<(), Box<dyn Error>> {
 
     if !python_path.exists() {
         return Err(format!(
-            "Virtual environment not found at {}. Run 'wovensnake install' first.",
+            "Virtual environment not found at {}. Run 'woven install' first.",
             venv_base.display()
         )
         .into());
@@ -51,8 +51,10 @@ pub fn execute(args: &[String]) -> Result<(), Box<dyn Error>> {
     };
 
     // Construct command environment
-    let path_var = std::env::var("PATH").unwrap_or_default();
-    let new_path = format!("{};{}", scripts_dir.display(), path_var); // Windows separator ;
+    let path_var = std::env::var_os("PATH").unwrap_or_default();
+    let mut paths = std::env::split_paths(&path_var).collect::<Vec<_>>();
+    paths.insert(0, scripts_dir.clone());
+    let new_path = std::env::join_paths(paths)?;
 
     let status = Command::new(final_cmd)
         .args(command_args)

@@ -21,7 +21,7 @@ pub fn execute() -> Result<(), Box<dyn Error>> {
             println!(" \x1b[32m•\x1b[0m {} \x1b[90mv{}\x1b[0m", name, pkg.version);
         }
     } else {
-        println!("No lockfile found. Run 'wovensnake install' to weave dependencies.");
+        println!("No lockfile found. Run 'woven install' to weave dependencies.");
         println!("\x1b[90mDeclared Dependencies:\x1b[0m");
         for (name, ver) in config.dependencies {
             println!(" - {name} {ver}");

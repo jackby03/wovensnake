@@ -105,7 +105,7 @@ pub fn extract_wheel(wheel_path: &Path, dest_path: &Path) -> Result<(), Box<dyn 
     Ok(())
 }
 
-pub fn generate_scripts(dist_info_path: &Path, scripts_dir: &Path) -> Result<(), Box<dyn Error>> {
+pub fn generate_scripts(dist_info_path: &Path, scripts_dir: &Path, python_version: &str) -> Result<(), Box<dyn Error>> {
     let entry_points_path = dist_info_path.join("entry_points.txt");
     if !entry_points_path.exists() {
         return Ok(());
@@ -162,7 +162,7 @@ python \"%~dp0\\{name}-script.py\" %*"
                         // For Unix
                         let sh_content = format!(
                             "#!/bin/sh
-export PYTHONPATH=\"$(dirname \"$0\")/../lib/python3.10/site-packages:$PYTHONPATH\"
+export PYTHONPATH=\"$(dirname \"$0\")/../lib/python{python_version}/site-packages:$PYTHONPATH\"
 python3 \"$(dirname \"$0\")/{name}-script.py\" \"$@\""
                         );
                         let sh_path = scripts_dir.join(name);

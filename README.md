@@ -51,25 +51,25 @@ cargo install wovensnake
 ### 1. Start a New Pattern (`init`)
 Prepares `wovenpkg.json` for your project.
 ```bash
-wovensnake init
+woven init
 ```
 
 ### 2. Knit Dependencies (`install`)
 Reads your pattern, gathers materials, and weaves the environment.
 ```bash
-wovensnake install
+woven install
 ```
 
 ### 3. Tidy Up (`remove`)
 Gently removes a package and its unused threads.
 ```bash
-wovensnake remove flask
+woven remove flask
 ```
 
 ### 4. View the Tapestry (`list`)
 Admire the packages currently woven into your project.
 ```bash
-wovensnake list
+woven list
 ```
 
 ---

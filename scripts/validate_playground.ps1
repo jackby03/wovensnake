@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 $ProjectRoot = Resolve-Path "$PSScriptRoot/.."
-$BinaryPath = "$ProjectRoot/target/debug/wovensnake.exe"
+$BinaryPath = "$ProjectRoot/target/debug/woven.exe"
 $PlaygroundDir = "$ProjectRoot/playground"
 $ReportsDir = "$ProjectRoot/reports"
 $ReportFile = "$ReportsDir/playground_report.html"

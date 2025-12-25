@@ -29,10 +29,11 @@ pub async fn execute() -> Result<(), Box<dyn Error>> {
         crate::core::venv::create_venv(venv_base)?;
     }
 
+    let python_dir = format!("python{}", config.python_version);
     let site_packages = if cfg!(windows) {
         venv_base.join("Lib").join("site-packages")
     } else {
-        venv_base.join("lib").join("python3.10").join("site-packages")
+        venv_base.join("lib").join(python_dir).join("site-packages")
     };
 
     if !site_packages.exists() {

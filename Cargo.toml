@@ -11,6 +11,10 @@ homepage = "https://github.com/jackby03/wovensnake"
 keywords = ["python", "package-manager", "rust", "installer", "cli"]
 categories = ["command-line-utilities", "development-tools"]
 
+[[bin]]
+name = "woven"
+path = "src/main.rs"
+
 [dependencies]
 tempfile = "3.1"
 serde = { version = "1.0", features = ["derive"] }

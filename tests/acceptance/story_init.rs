@@ -7,7 +7,8 @@ fn uat_user_story_create_project() {
     
     let dir = tempdir().unwrap();
     let root = dir.path();
-    let exe = std::env::current_dir().unwrap().join("target/debug/wovensnake.exe");
+    let exe_name = if cfg!(windows) { "woven.exe" } else { "woven" };
+    let exe = std::env::current_dir().unwrap().join("target/debug").join(exe_name);
     
     if !exe.exists() { return; } // Skip if not built
 

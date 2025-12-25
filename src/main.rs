@@ -12,7 +12,7 @@ use clap::{Parser, Subcommand};
 use wovensnake::cli;
 
 #[derive(Parser)]
-#[command(name = "wovensnake")]
+#[command(name = "woven")]
 #[command(about = "A Python package manager built with Rust", long_about = None)]
 struct Cli {
     #[command(subcommand)]
