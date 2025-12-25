@@ -24,7 +24,7 @@ pub async fn find_python_executable(expected: &str) -> Result<String, Box<dyn Er
                 // Python 2.x and some 3.x versions print to stderr, others to stdout
                 let version_str = if stdout.is_empty() { stderr } else { stdout };
 
-                if version_str.contains(expected) {
+                if version_str.contains(expected) || version_str.starts_with(&format!("Python {expected}")) {
                     return Ok(cmd.to_string());
                 }
             }

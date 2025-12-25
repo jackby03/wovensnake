@@ -19,7 +19,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            artifact_name: woven
+n            artifact_name: woven
             asset_name: woven-linux-amd64
           - os: windows-latest
             artifact_name: woven.exe
