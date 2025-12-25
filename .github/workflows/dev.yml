@@ -2,9 +2,9 @@ name: Development CI
 
 on:
   push:
-    branches: [ "develop", "feature/*" ]
+    branches: [ "develop", "main" ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "develop", "main" ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -77,25 +77,3 @@ jobs:
 
       - name: Run Tests
         run: cargo test --verbose
-
-  # --------------------------------------------------------------------------
-  # 3. BUILD ARTIFACTS (DISABLED FOR EARLY DEV)
-  # --------------------------------------------------------------------------
-  # build:
-  #   name: Build Release
-  #   needs: test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     
-  #     - name: Install Rust Toolchain
-  #       uses: dtolnay/rust-toolchain@stable
-  #
-  #     - name: Build Release Binary
-  #       run: cargo build --release --verbose
-  #
-  #     - name: Upload Artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: wovensnake-linux
-  #         path: target/release/wovensnake
