@@ -19,14 +19,14 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            artifact_name: wovensnake
-            asset_name: wovensnake-linux-amd64
+            artifact_name: woven
+            asset_name: woven-linux-amd64
           - os: windows-latest
-            artifact_name: wovensnake.exe
-            asset_name: wovensnake-windows-amd64.exe
+            artifact_name: woven.exe
+            asset_name: woven-windows-amd64.exe
           - os: macos-latest
-            artifact_name: wovensnake
-            asset_name: wovensnake-macos-amd64
+            artifact_name: woven
+            asset_name: woven-macos-amd64
 
     steps:
       - uses: actions/checkout@v4
