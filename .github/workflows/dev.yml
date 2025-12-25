@@ -10,6 +10,11 @@ env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
 
+# Save minutes by cancelling obsolete runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # --------------------------------------------------------------------------
   # 1. QUALITY GATES (Linting & Formatting)
