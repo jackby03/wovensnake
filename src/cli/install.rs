@@ -72,9 +72,9 @@ pub async fn execute() -> Result<(), Box<dyn Error>> {
             &multi,
         )
         .await?;
-        
+
         prune_unused_packages(&site_packages, &lockfile, &multi);
-        
+
         if count > 0 {
             println!("\n\x1b[1m\x1b[32m✨ Done!\x1b[0m {count} packages ready.");
         } else {
@@ -96,11 +96,11 @@ pub async fn execute() -> Result<(), Box<dyn Error>> {
             lock_path,
         )
         .await?;
-        
+
         // Re-read lockfile for pruning
         let lockfile = Lockfile::read(lock_path)?;
         prune_unused_packages(&site_packages, &lockfile, &multi);
-        
+
         println!("\n\x1b[1m\x1b[32m✨ Done!\x1b[0m Resolution complete.");
     }
 
@@ -300,11 +300,7 @@ async fn resolve_and_install_final(
     Ok(resolved.len())
 }
 
-fn prune_unused_packages(
-    site_packages: &Path,
-    lockfile: &Lockfile,
-    multi: &MultiProgress,
-) {
+fn prune_unused_packages(site_packages: &Path, lockfile: &Lockfile, multi: &MultiProgress) {
     let pb = multi.add(ProgressBar::new_spinner());
     pb.set_style(
         ProgressStyle::with_template("{spinner:.red} {msg}")

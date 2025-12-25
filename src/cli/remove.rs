@@ -7,7 +7,8 @@ use crate::core::config;
 
 pub async fn execute(package_name: &str) -> Result<(), Box<dyn Error>> {
     println!(
-        "\x1b[1m\x1b[36m🐍 WovenSnake\x1b[0m \x1b[90m| Removing package {package_name}\x1b[0m\n"
+        "\x1b[1m\x1b[36m🐍 WovenSnake\x1b[0m \x1b[90m| Removing package {}\x1b[0m\n",
+        package_name
     );
 
     let config_path = "wovenpkg.json";
