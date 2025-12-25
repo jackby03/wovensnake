@@ -22,7 +22,7 @@
 wovenpkg.lock
 wovenpkg.json
 /\.woven/
-/reports
+/reports/
 reports/playground_report.html
 
 # ----------------------------------------------------------------------------

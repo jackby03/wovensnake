@@ -62,15 +62,13 @@ pub async fn ensure_python_version(version: &str) -> Result<PathBuf, Box<dyn Err
         return Err(e);
     }
 
-    if let Some(exe) = find_executable_in_managed_path(&managed_path) {
-        Ok(exe)
-    } else {
-        Err(format!(
+    find_executable_in_managed_path(&managed_path).ok_or_else(|| {
+        format!(
             "Failed to find python executable after extraction in {}",
             managed_path.display()
         )
-        .into())
-    }
+        .into()
+    })
 }
 
 fn find_executable_in_managed_path(managed_path: &Path) -> Option<PathBuf> {
@@ -89,12 +87,7 @@ fn find_executable_in_managed_path(managed_path: &Path) -> Option<PathBuf> {
         ]
     };
 
-    for candidate in candidates {
-        if candidate.exists() {
-            return Some(candidate);
-        }
-    }
-    None
+    candidates.into_iter().find(|candidate| candidate.exists())
 }
 
 fn get_managed_python_path(version: &str) -> Result<PathBuf, Box<dyn Error>> {
@@ -149,7 +142,7 @@ async fn download_and_extract_python(version: &str, dest: &Path) -> Result<(), B
     let mut last_url = String::new();
 
     for url in urls {
-        last_url = url.clone();
+        last_url.clone_from(&url);
         let client = reqwest::Client::builder().user_agent("wovensnake").build()?;
         match client.get(&url).send().await {
             Ok(res) if res.status().is_success() => {
@@ -191,7 +184,9 @@ async fn download_and_extract_python(version: &str, dest: &Path) -> Result<(), B
     pb.finish_with_message("Download complete");
 
     println!("Extracting Python...");
-    let is_zip = last_url.ends_with(".zip");
+    let is_zip = Path::new(&last_url)
+        .extension()
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("zip"));
     extract_archive(temp_file.path(), dest, is_zip)?;
 
     // Post-installation patches (inspired by uv)
@@ -258,7 +253,7 @@ fn find_install_dir(base: &Path) -> Option<PathBuf> {
 }
 
 fn get_metadata_entries() -> Result<&'static Vec<MetadataAsset>, Box<dyn Error>> {
-    METADATA_CACHE.get_or_try_init(|| load_metadata_entries())
+    METADATA_CACHE.get_or_try_init(load_metadata_entries)
 }
 
 fn load_metadata_entries() -> Result<Vec<MetadataAsset>, Box<dyn Error>> {
@@ -274,7 +269,7 @@ fn load_metadata_entries() -> Result<Vec<MetadataAsset>, Box<dyn Error>> {
 fn resolve_from_metadata(version: &str, platform_key: &str) -> Result<Option<Vec<String>>, Box<dyn Error>> {
     let entries = get_metadata_entries()?;
     let mut matches = Vec::new();
-    for asset in entries.iter() {
+    for asset in entries {
         if !asset.platform.starts_with(platform_key) {
             continue;
         }
@@ -319,10 +314,12 @@ fn version_match_score(asset_version: &str, requested_version: &str) -> i32 {
     }
     let req_parts: Vec<_> = requested_version.split('.').collect();
     let asset_parts: Vec<_> = asset_version.split('.').collect();
-    if req_parts.len() >= 2 && asset_parts.len() >= 2 {
-        if req_parts[0] == asset_parts[0] && req_parts[1] == asset_parts[1] {
-            return 300;
-        }
+    if req_parts.len() >= 2
+        && asset_parts.len() >= 2
+        && req_parts[0] == asset_parts[0]
+        && req_parts[1] == asset_parts[1]
+    {
+        return 300;
     }
     0
 }
