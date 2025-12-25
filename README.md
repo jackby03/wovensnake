@@ -1,5 +1,10 @@
 # 🐍 WovenSnake
 
+> **v0.1.0 "Blind Snake" Edition** 🐍  
+> *Status: Initial Stable Development*  
+>
+> *Ready for use. Includes deterministic installation, zero-config venvs, self-healing environments, and industrial-grade quality.*
+
 A high-performance Python package manager built with **Rust**.
 
 ## ✨ Features
