@@ -1,0 +1,90 @@
+[
+  {
+    "name": "cpython",
+    "version": "3.11.14",
+    "platform": "x86_64-pc-windows-msvc",
+    "os": "windows",
+    "arch": "x86_64",
+    "libc": "msvc",
+    "flavor": "install_only",
+    "shared": false,
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20251217/cpython-3.11.14+20251217-x86_64-pc-windows-msvc-install_only.tar.gz"
+  },
+  {
+    "name": "cpython",
+    "version": "3.11.14",
+    "platform": "x86_64-unknown-linux-gnu",
+    "os": "linux",
+    "arch": "x86_64",
+    "libc": "gnu",
+    "flavor": "install_only",
+    "shared": false,
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20251217/cpython-3.11.14+20251217-x86_64-unknown-linux-gnu-install_only.tar.gz"
+  },
+  {
+    "name": "cpython",
+    "version": "3.12.12",
+    "platform": "x86_64-pc-windows-msvc",
+    "os": "windows",
+    "arch": "x86_64",
+    "libc": "msvc",
+    "flavor": "install_only",
+    "shared": false,
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20251217/cpython-3.12.12+20251217-x86_64-pc-windows-msvc-install_only.tar.gz"
+  },
+  {
+    "name": "cpython",
+    "version": "3.12.12",
+    "platform": "x86_64-unknown-linux-gnu",
+    "os": "linux",
+    "arch": "x86_64",
+    "libc": "gnu",
+    "flavor": "install_only",
+    "shared": false,
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20251217/cpython-3.12.12+20251217-x86_64-unknown-linux-gnu-install_only.tar.gz"
+  },
+  {
+    "name": "cpython",
+    "version": "3.13.11",
+    "platform": "x86_64-pc-windows-msvc",
+    "os": "windows",
+    "arch": "x86_64",
+    "libc": "msvc",
+    "flavor": "install_only",
+    "shared": false,
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20251217/cpython-3.13.11+20251217-x86_64-pc-windows-msvc-install_only.tar.gz"
+  },
+  {
+    "name": "cpython",
+    "version": "3.13.11",
+    "platform": "x86_64-unknown-linux-gnu",
+    "os": "linux",
+    "arch": "x86_64",
+    "libc": "gnu",
+    "flavor": "install_only",
+    "shared": false,
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20251217/cpython-3.13.11+20251217-x86_64-unknown-linux-gnu-install_only.tar.gz"
+  },
+  {
+    "name": "cpython",
+    "version": "3.10.19",
+    "platform": "x86_64-pc-windows-msvc",
+    "os": "windows",
+    "arch": "x86_64",
+    "libc": "msvc",
+    "flavor": "install_only",
+    "shared": false,
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20251217/cpython-3.10.19+20251217-x86_64-pc-windows-msvc-install_only.tar.gz"
+  },
+  {
+    "name": "cpython",
+    "version": "3.10.19",
+    "platform": "x86_64-unknown-linux-gnu",
+    "os": "linux",
+    "arch": "x86_64",
+    "libc": "gnu",
+    "flavor": "install_only",
+    "shared": false,
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20251217/cpython-3.10.19+20251217-x86_64-unknown-linux-gnu-install_only.tar.gz"
+  }
+]

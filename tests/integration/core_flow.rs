@@ -39,7 +39,7 @@ fn test_lockfile_integrity() {
     let dir = tempdir().unwrap();
     let lock_path = dir.path().join("wovenpkg.lock");
 
-    let mut lockfile = Lockfile::new("test-project", "0.1.0");
+    let mut lockfile = Lockfile::new("test-project", "0.1.0", "3.10");
     lockfile.packages.insert(
         "requests".to_string(),
         LockedPackage {
