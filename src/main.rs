@@ -10,9 +10,10 @@
 
 use clap::{Parser, Subcommand};
 use wovensnake::cli;
+use wovensnake::cli::ux;
 
 #[derive(Parser)]
-#[command(name = "wovensnake")]
+#[command(name = "woven")]
 #[command(about = "A Python package manager built with Rust", long_about = None)]
 struct Cli {
     #[command(subcommand)]
@@ -23,6 +24,13 @@ struct Cli {
 enum Commands {
     /// Initialize a new `WovenSnake` project
     Init,
+    /// Add a new package to the project
+    Add {
+        /// Name of the package to add
+        name: String,
+        /// Optional version of the package
+        version: Option<String>,
+    },
     /// Install dependencies from wovenpkg.json
     Install,
     /// Update dependencies to their latest versions
@@ -36,6 +44,12 @@ enum Commands {
     Remove { name: String },
     /// List installed packages
     List,
+    /// Clean project dependencies and virtual environment
+    Clean {
+        /// Also clear the global cache
+        #[arg(long)]
+        all: bool,
+    },
 }
 
 #[tokio::main]
@@ -45,33 +59,43 @@ async fn main() {
     match cli.command {
         Commands::Init => {
             if let Err(e) = cli::init::execute() {
-                eprintln!("Error during init: {e}");
+                ux::print_error(format!("Failed to initialize project: {e}"));
+            }
+        }
+        Commands::Add { name, version } => {
+            if let Err(e) = cli::add::execute(&name, version).await {
+                ux::print_error(format!("Failed to add package '{name}': {e}"));
             }
         }
         Commands::Install => {
             if let Err(e) = cli::install::execute().await {
-                eprintln!("Error during install: {e}");
+                ux::print_error(format!("Installation failed: {e}"));
             }
         }
         Commands::Update => {
             if let Err(e) = cli::update::execute().await {
-                eprintln!("Error during update: {e}");
+                ux::print_error(format!("Update failed: {e}"));
             }
         }
         Commands::Run { args } => {
             if let Err(e) = cli::run::execute(&args) {
-                eprintln!("Error during run: {e}");
+                ux::print_error(format!("Execution failed: {e}"));
                 std::process::exit(1);
             }
         }
         Commands::Remove { name } => {
             if let Err(e) = cli::remove::execute(&name).await {
-                eprintln!("Error during remove: {e}");
+                ux::print_error(format!("Failed to remove package '{name}': {e}"));
             }
         }
         Commands::List => {
             if let Err(e) = cli::list::execute() {
-                eprintln!("Error during list: {e}");
+                ux::print_error(format!("Failed to list packages: {e}"));
+            }
+        }
+        Commands::Clean { all } => {
+            if let Err(e) = cli::clean::execute(all) {
+                ux::print_error(format!("Clean failed: {e}"));
             }
         }
     }

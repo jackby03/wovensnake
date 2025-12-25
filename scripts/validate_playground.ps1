@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 $ProjectRoot = Resolve-Path "$PSScriptRoot/.."
-$BinaryPath = "$ProjectRoot/target/debug/wovensnake.exe"
+$BinaryPath = "$ProjectRoot/target/debug/woven.exe"
 $PlaygroundDir = "$ProjectRoot/playground"
 $ReportsDir = "$ProjectRoot/reports"
 $ReportFile = "$ReportsDir/playground_report.html"
@@ -19,7 +19,7 @@ if (-not (Test-Path $ReportsDir)) {
 }
 
 # 1. Cleanup
-Write-Host "`n[1/6] Cleaning up previous playground..." -ForegroundColor Yellow
+Write-Host "`n[1/9] Cleaning up previous playground..." -ForegroundColor Yellow
 if (Test-Path $PlaygroundDir) {
     Remove-Item -Recurse -Force $PlaygroundDir
 }
@@ -52,7 +52,7 @@ function Add-Result {
     param($Action, $Result, $Duration, $OutputContent)
     
     $StatusClass = if($Result.Success -and ($null -eq $Result.Check -or $Result.Check)) { "pass" } else { "fail" }
-    $StatusText = if($StatusClass -eq "pass") { "✅ PASS" } else { "❌ FAIL" }
+    $StatusText = if($StatusClass -eq "pass") { "PASS" } else { "FAIL" }
     $DurationText = $Duration.TotalSeconds.ToString("N2") + "s"
 
     # Add Table Row
@@ -98,28 +98,37 @@ Set-Content -Path "wovenpkg.json" -Value $ConfigContent
 $ResInstall = Run-Step "Install Dependencies" $BinaryPath @("install")
 Add-Result "Install Packages" $ResInstall $ResInstall.Duration $ResInstall.Output
 
-# 5. Verify Installation (Run Python)
+# 5. Add
+$ResAdd = Run-Step "Add Package (Click)" $BinaryPath @("add", "click")
+Add-Result "Add Package" $ResAdd $ResAdd.Duration $ResAdd.Output
+
+# 6. Verify Installation (Run Python)
 $PyScript = @"
 import requests
 import flask
-print(f'SUCCESS: Requests {requests.__version__}, Flask {flask.__version__}')
+import click
+print(f'SUCCESS: Requests {requests.__version__}, Flask {flask.__version__}, Click {click.__version__}')
 "@
 Set-Content "test_app.py" $PyScript
 $ResRun = Run-Step "Run Python Script" $BinaryPath @("run", "python", "test_app.py")
 $Check = $ResRun.Success -and ($ResRun.Output -match 'SUCCESS')
 $ResRun.Check = $Check 
-Add-Result "Run Script (wovensnake run)" $ResRun $ResRun.Duration $ResRun.Output
+Add-Result "Run Script (woven run)" $ResRun $ResRun.Duration $ResRun.Output
 
-# 6. Remove
+# 7. Remove
 $ResRemove = Run-Step "Remove Package (Flask)" $BinaryPath @("remove", "flask")
 Add-Result "Remove Package" $ResRemove $ResRemove.Duration $ResRemove.Output
 
-# 7. List
+# 8. List
 $ResList = Run-Step "List Packages" $BinaryPath @("list")
 $ListOutput = $ResList.Output | Out-String
 $Cleaned = $ListOutput -notmatch "Flask"
 $ResList.Check = $ResList.Success -and $Cleaned
 Add-Result "Verify Pruning" $ResList $ResList.Duration $ResList.Output
+
+# 9. Clean
+$ResClean = Run-Step "Clean Project" $BinaryPath @("clean")
+Add-Result "Clean Project" $ResClean $ResClean.Duration $ResClean.Output
 
 # Generate HTML
 $HtmlContent = @"
@@ -155,7 +164,7 @@ $HtmlContent = @"
     </style>
 </head>
 <body>
-    <h1>🐍 WovenSnake Usability Report</h1>
+    <h1>WovenSnake Usability Report</h1>
     
     <div class="summary">
         <p><strong>Date:</strong> $(Get-Date)</p>
@@ -192,9 +201,9 @@ Set-Content -Path $ReportFile -Value $HtmlContent
 Write-Host "`nReport generated at $ReportFile" -ForegroundColor Cyan
 
 # Final Cleanup
-Write-Host "`n[6/6] Destroying playground..." -ForegroundColor Yellow
+Write-Host "`n[9/9] Destroying playground..." -ForegroundColor Yellow
 Set-Location $ProjectRoot
 if (Test-Path $PlaygroundDir) {
     Remove-Item -Recurse -Force $PlaygroundDir
-    Write-Host "Playground destroyed successfully. 🧹" -ForegroundColor Green
+    Write-Host "Playground destroyed successfully." -ForegroundColor Green
 }

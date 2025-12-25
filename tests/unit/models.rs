@@ -1,5 +1,5 @@
-use wovensnake::core::config::Config;
 use std::collections::HashMap;
+use wovensnake::core::config::Config;
 
 #[test]
 fn test_config_model() {
@@ -10,7 +10,7 @@ fn test_config_model() {
         virtual_environment: "env".into(),
         dependencies: HashMap::from([("pip".into(), "20.0".into())]),
     };
-    
+
     // Pure logic assertions
     assert_eq!(conf.name, "test");
     assert!(conf.dependencies.contains_key("pip"));
