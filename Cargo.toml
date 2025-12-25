@@ -53,6 +53,26 @@ opt-level = 3
 debug = false
 lto = true
 
+[[test]]
+name = "acceptance"
+path = "tests/acceptance/story_init.rs"
+
+[[test]]
+name = "integration_core"
+path = "tests/integration/core_flow.rs"
+
+[[test]]
+name = "integration_features"
+path = "tests/integration/features.rs"
+
+[[test]]
+name = "system"
+path = "tests/system/cli_execution.rs"
+
+[[test]]
+name = "unit"
+path = "tests/unit/models.rs"
+
 [features]
 default = ["logging"]
 logging = []

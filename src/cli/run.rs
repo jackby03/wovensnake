@@ -53,7 +53,7 @@ pub fn execute(args: &[String]) -> Result<(), Box<dyn Error>> {
     // Construct command environment
     let path_var = std::env::var_os("PATH").unwrap_or_default();
     let mut paths = std::env::split_paths(&path_var).collect::<Vec<_>>();
-    paths.insert(0, scripts_dir.clone());
+    paths.insert(0, scripts_dir);
     let new_path = std::env::join_paths(paths)?;
 
     let status = Command::new(final_cmd)
