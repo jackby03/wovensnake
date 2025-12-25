@@ -39,6 +39,13 @@ jobs:
       - name: Build Release
         run: cargo build --release --verbose
 
+      - name: Extract Changelog
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          # Extract content between the version header and the next header
+          sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '1d;$d' > release_notes.md
+
       # Prepare asset name (Cross-platform way using bash which works on all runners)
       - name: Prepare Asset
         shell: bash
@@ -50,6 +57,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: target/release/${{ matrix.asset_name }}
+          body_path: release_notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
