@@ -4,7 +4,9 @@ use std::process::Command;
 
 use indicatif::{ProgressBar, ProgressStyle};
 
-pub fn create_venv(path: &Path) -> Result<(), Box<dyn Error>> {
+use crate::core::python;
+
+pub fn create_venv(path: &Path, python_version: &str) -> Result<(), Box<dyn Error>> {
     let pb = ProgressBar::new_spinner();
     pb.set_style(
         ProgressStyle::default_spinner()
@@ -13,9 +15,9 @@ pub fn create_venv(path: &Path) -> Result<(), Box<dyn Error>> {
     );
     pb.set_message(format!("Creating virtual environment in {}...", path.display()));
 
-    // Check version
-    let python_exe = if cfg!(windows) { "python" } else { "python3" };
-    let version_output = Command::new(python_exe).arg("-V").output()?;
+    // Find the correct python executable
+    let python_exe = python::find_python_executable(python_version)?;
+    let version_output = Command::new(&python_exe).arg("-V").output()?;
     let version_str = String::from_utf8_lossy(&version_output.stdout);
     pb.set_message(format!(
         "Using {} ({}) to create venv...",
