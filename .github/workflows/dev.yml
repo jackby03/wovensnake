@@ -1,0 +1,86 @@
+name: Development CI
+
+on:
+  push:
+    branches: [ "develop", "feature/*" ]
+  pull_request:
+    branches: [ "develop" ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # --------------------------------------------------------------------------
+  # 1. QUALITY GATES (Linting & Formatting)
+  # --------------------------------------------------------------------------
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Check Formatting
+        run: cargo fmt -- --check
+
+      - name: Clippy Linting
+        run: cargo clippy -- -D warnings
+
+  # --------------------------------------------------------------------------
+  # 2. TEST SUITE (Unit, Integration, System)
+  # --------------------------------------------------------------------------
+  test:
+    name: Test Suite (${{ matrix.os }})
+    needs: quality
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Run Tests
+        run: cargo test --verbose
+
+  # --------------------------------------------------------------------------
+  # 3. BUILD ARTIFACTS (DISABLED FOR EARLY DEV)
+  # --------------------------------------------------------------------------
+  # build:
+  #   name: Build Release
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     
+  #     - name: Install Rust Toolchain
+  #       uses: dtolnay/rust-toolchain@stable
+  #
+  #     - name: Build Release Binary
+  #       run: cargo build --release --verbose
+  #
+  #     - name: Upload Artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: wovensnake-linux
+  #         path: target/release/wovensnake
