@@ -17,7 +17,7 @@ use crate::dependencies::package;
 
 pub async fn execute() -> Result<(), Box<dyn Error>> {
     let config = config::read_config("wovenpkg.json")?;
-    
+
     // Validate Python version before proceeding
     crate::core::python::validate_python_version(&config.python_version)?;
 
