@@ -1,6 +1,6 @@
 [package]
 name = "wovensnake"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["jackby03 jackdelaguilavilla03@gmail.com"]
 edition = "2021"
 description = "A high-performance Python package manager built with Rust."
@@ -10,6 +10,10 @@ repository = "https://github.com/jackby03/wovensnake"
 homepage = "https://github.com/jackby03/wovensnake"
 keywords = ["python", "package-manager", "rust", "installer", "cli"]
 categories = ["command-line-utilities", "development-tools"]
+
+[[bin]]
+name = "woven"
+path = "src/main.rs"
 
 [dependencies]
 tempfile = "3.1"
@@ -48,6 +52,26 @@ split-debuginfo = "unpacked"
 opt-level = 3
 debug = false
 lto = true
+
+[[test]]
+name = "acceptance"
+path = "tests/acceptance/story_init.rs"
+
+[[test]]
+name = "integration_core"
+path = "tests/integration/core_flow.rs"
+
+[[test]]
+name = "integration_features"
+path = "tests/integration/features.rs"
+
+[[test]]
+name = "system"
+path = "tests/system/cli_execution.rs"
+
+[[test]]
+name = "unit"
+path = "tests/unit/models.rs"
 
 [features]
 default = ["logging"]

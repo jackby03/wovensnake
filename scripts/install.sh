@@ -3,7 +3,7 @@ set -e
 
 REPO="jackby03/wovensnake"
 INSTALL_DIR="$HOME/.wovensnake/bin"
-EXE_NAME="wovensnake"
+EXE_NAME="woven"
 
 echo "🧶 WovenSnake Installer"
 echo "-----------------------"

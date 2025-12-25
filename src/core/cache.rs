@@ -61,4 +61,12 @@ impl Cache {
         fs::write(&pkg_path, data)?;
         Ok(pkg_path)
     }
+
+    pub fn clear(&self) -> Result<(), Box<dyn Error>> {
+        if self.base_dir.exists() {
+            fs::remove_dir_all(&self.base_dir)?;
+            fs::create_dir_all(&self.base_dir)?;
+        }
+        Ok(())
+    }
 }

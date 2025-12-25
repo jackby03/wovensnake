@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 
 $Repo = "jackby03/wovensnake"
 $InstallDir = "$env:USERPROFILE\.wovensnake\bin"
-$ExeName = "wovensnake.exe"
+$ExeName = "woven.exe"
 $AssetUrl = "https://github.com/$Repo/releases/latest/download/wovensnake-windows-amd64.exe"
 
 Write-Host "🧶 WovenSnake Installer" -ForegroundColor Green
@@ -39,4 +39,4 @@ if ($CurrentPath -notlike "*$InstallDir*") {
 }
 
 Write-Host "`n✨ WovenSnake successfully installed!" -ForegroundColor Cyan
-Write-Host "Try it now: wovensnake --help" -ForegroundColor Gray
+Write-Host "Try it now: woven --help" -ForegroundColor Gray
