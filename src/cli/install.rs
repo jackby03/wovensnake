@@ -17,6 +17,10 @@ use crate::dependencies::package;
 
 pub async fn execute() -> Result<(), Box<dyn Error>> {
     let config = config::read_config("wovenpkg.json")?;
+
+    // Validate Python version before proceeding
+    crate::core::python::validate_python_version(&config.python_version)?;
+
     let lock_path = Path::new("wovenpkg.lock");
     let cache = Cache::init()?;
 
@@ -27,7 +31,7 @@ pub async fn execute() -> Result<(), Box<dyn Error>> {
 
     let venv_base = Path::new(&config.virtual_environment);
     if !venv_base.exists() {
-        crate::core::venv::create_venv(venv_base)?;
+        crate::core::venv::create_venv(venv_base, &config.python_version)?;
     }
 
     let python_dir = format!("python{}", config.python_version);
