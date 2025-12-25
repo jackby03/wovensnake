@@ -2,7 +2,7 @@
 name = "wovensnake"
 version = "0.1.0"
 authors = ["jackby03 jackdelaguilavilla03@gmail.com"]
-edition = "2021"
+edition = "2025"
 description = "A high-performance Python package manager built with Rust."
 license = "MIT"
 readme = "README.md"
