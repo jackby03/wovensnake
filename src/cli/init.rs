@@ -1,13 +1,15 @@
+use crate::cli::ux;
 use crate::core::config::Config;
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
 pub fn execute() -> Result<(), Box<dyn std::error::Error>> {
+    ux::print_header("Initializing Project");
     let path = Path::new("wovenpkg.json");
 
     if path.exists() {
-        println!("wovenpkg.json already exists in this directory.");
+        ux::print_warning("wovenpkg.json already exists in this directory.");
         return Ok(());
     }
 
@@ -22,6 +24,6 @@ pub fn execute() -> Result<(), Box<dyn std::error::Error>> {
     let json = serde_json::to_string_pretty(&default_config)?;
     fs::write(path, json)?;
 
-    println!("Successfully initialized WovenSnake project: wovenpkg.json created.");
+    ux::print_success("Successfully initialized WovenSnake project: wovenpkg.json created.");
     Ok(())
 }

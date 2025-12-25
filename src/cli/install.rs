@@ -8,6 +8,7 @@ use futures::stream::{self, StreamExt};
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use sha2::{Digest, Sha256};
 
+use crate::cli::ux;
 use crate::core::cache::Cache;
 use crate::core::config;
 use crate::core::lock::{Artifact, LockedPackage, Lockfile};
@@ -61,7 +62,7 @@ pub async fn execute() -> Result<(), Box<dyn Error>> {
     let multi = MultiProgress::new();
 
     if lock_path.exists() {
-        println!("\x1b[1m\x1b[36m🐍 WovenSnake\x1b[0m \x1b[90m| Synchronizing from lockfile...\x1b[0m\n");
+        ux::print_header("Synchronizing from lockfile...");
         let lockfile = Lockfile::read(lock_path)?;
         let count = install_from_lock(
             &lockfile,
@@ -77,15 +78,12 @@ pub async fn execute() -> Result<(), Box<dyn Error>> {
         prune_unused_packages(&site_packages, &lockfile, &multi);
 
         if count > 0 {
-            println!("\n\x1b[1m\x1b[32m✨ Done!\x1b[0m {count} packages ready.");
+            ux::print_success(format!("{count} packages ready."));
         } else {
-            println!("\n\x1b[1m\x1b[32m✨ All dependencies are already satisfied.\x1b[0m");
+            ux::print_success("All dependencies are already satisfied.");
         }
     } else {
-        println!(
-            "\x1b[1m\x1b[36m🐍 WovenSnake\x1b[0m \x1b[90m| Weaving dependency tree for {}\x1b[0m\n",
-            config.name
-        );
+        ux::print_header(&format!("Weaving dependency tree for {}", config.name));
         resolve_and_install_final(
             &config,
             &installed,
@@ -102,7 +100,7 @@ pub async fn execute() -> Result<(), Box<dyn Error>> {
         let lockfile = Lockfile::read(lock_path)?;
         prune_unused_packages(&site_packages, &lockfile, &multi);
 
-        println!("\n\x1b[1m\x1b[32m✨ Done!\x1b[0m Resolution complete.");
+        ux::print_success("Resolution complete.");
     }
 
     Ok(())

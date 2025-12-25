@@ -10,6 +10,7 @@
 
 use clap::{Parser, Subcommand};
 use wovensnake::cli;
+use wovensnake::cli::ux;
 
 #[derive(Parser)]
 #[command(name = "woven")]
@@ -52,38 +53,38 @@ async fn main() {
     match cli.command {
         Commands::Init => {
             if let Err(e) = cli::init::execute() {
-                eprintln!("Error during init: {e}");
+                ux::print_error(format!("Failed to initialize project: {e}"));
             }
         }
         Commands::Add { name, version } => {
             if let Err(e) = cli::add::execute(&name, version).await {
-                eprintln!("Error during add: {e}");
+                ux::print_error(format!("Failed to add package '{name}': {e}"));
             }
         }
         Commands::Install => {
             if let Err(e) = cli::install::execute().await {
-                eprintln!("Error during install: {e}");
+                ux::print_error(format!("Installation failed: {e}"));
             }
         }
         Commands::Update => {
             if let Err(e) = cli::update::execute().await {
-                eprintln!("Error during update: {e}");
+                ux::print_error(format!("Update failed: {e}"));
             }
         }
         Commands::Run { args } => {
             if let Err(e) = cli::run::execute(&args) {
-                eprintln!("Error during run: {e}");
+                ux::print_error(format!("Execution failed: {e}"));
                 std::process::exit(1);
             }
         }
         Commands::Remove { name } => {
             if let Err(e) = cli::remove::execute(&name).await {
-                eprintln!("Error during remove: {e}");
+                ux::print_error(format!("Failed to remove package '{name}': {e}"));
             }
         }
         Commands::List => {
             if let Err(e) = cli::list::execute() {
-                eprintln!("Error during list: {e}");
+                ux::print_error(format!("Failed to list packages: {e}"));
             }
         }
     }
