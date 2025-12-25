@@ -43,6 +43,41 @@ async fn test_remove_logic_simulation() {
     assert_eq!(re_read.dependencies.get("requests").unwrap(), "2.25.0");
 }
 
+#[tokio::test]
+async fn test_add_logic_simulation() {
+    let dir = tempdir().unwrap();
+    let config_path = dir.path().join("wovenpkg.json");
+
+    // 1. Setup Initial State
+    let mut config = config::Config {
+        name: "test".into(),
+        version: "0.1.0".into(),
+        python_version: "3.10".into(),
+        virtual_environment: "venv".into(),
+        dependencies: HashMap::from([("requests".to_string(), "2.25.0".to_string())]),
+    };
+
+    let json = serde_json::to_string(&config).unwrap();
+    fs::write(&config_path, json).unwrap();
+
+    // 2. Perform Add Logic (Simulated)
+    let pkg_to_add = "flask";
+    let version_to_add = "2.0.0";
+
+    config
+        .dependencies
+        .insert(pkg_to_add.to_string(), version_to_add.to_string());
+
+    // 3. Verify Config Update
+    let new_json = serde_json::to_string(&config).unwrap();
+    fs::write(&config_path, new_json).unwrap();
+
+    let re_read = config::read_config(&config_path).unwrap();
+    assert_eq!(re_read.dependencies.len(), 2);
+    assert_eq!(re_read.dependencies.get("flask").unwrap(), "2.0.0");
+    assert_eq!(re_read.dependencies.get("requests").unwrap(), "2.25.0");
+}
+
 #[test]
 fn test_lockfile_pruning_logic() {
     // Determine if we can identify packages to remove

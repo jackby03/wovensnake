@@ -30,10 +30,10 @@
     </style>
 </head>
 <body>
-    <h1>🐍 WovenSnake Usability Report</h1>
+    <h1>WovenSnake Usability Report</h1>
     
     <div class="summary">
-        <p><strong>Date:</strong> 12/24/2025 20:02:03</p>
+        <p><strong>Date:</strong> 12/25/2025 02:51:40</p>
         <p><strong>Version:</strong> v0.1.0</p>
         <p><strong>Environment:</strong> Windows (PowerShell)</p>
     </div>
@@ -49,11 +49,12 @@
             </tr>
         </thead>
         <tbody>
-            <tr><td>1</td><td>Init Project</td><td><span class='pass'>✅ PASS</span></td><td>0.11s</td></tr>
-<tr><td>2</td><td>Install Packages</td><td><span class='pass'>✅ PASS</span></td><td>14.47s</td></tr>
-<tr><td>3</td><td>Run Script (woven run)</td><td><span class='pass'>✅ PASS</span></td><td>1.80s</td></tr>
-<tr><td>4</td><td>Remove Package</td><td><span class='pass'>✅ PASS</span></td><td>0.71s</td></tr>
-<tr><td>5</td><td>Verify Pruning</td><td><span class='pass'>✅ PASS</span></td><td>0.04s</td></tr>
+            <tr><td>1</td><td>Init Project</td><td><span class='pass'>PASS</span></td><td>0.03s</td></tr>
+<tr><td>2</td><td>Install Packages</td><td><span class='pass'>PASS</span></td><td>9.85s</td></tr>
+<tr><td>3</td><td>Add Package</td><td><span class='pass'>PASS</span></td><td>0.67s</td></tr>
+<tr><td>4</td><td>Run Script (woven run)</td><td><span class='pass'>PASS</span></td><td>1.47s</td></tr>
+<tr><td>5</td><td>Remove Package</td><td><span class='pass'>PASS</span></td><td>0.56s</td></tr>
+<tr><td>6</td><td>Verify Pruning</td><td><span class='pass'>PASS</span></td><td>0.02s</td></tr>
 
         </tbody>
     </table>
@@ -62,7 +63,7 @@
         <details>
         <summary>
             <span>1. Init Project</span>
-            <span class='pass'>✅ PASS</span>
+            <span class='pass'>PASS</span>
         </summary>
         <div class="output-content">
             <pre>Successfully initialized WovenSnake project: wovenpkg.json created.
@@ -71,7 +72,7 @@
     </details>    <details>
         <summary>
             <span>2. Install Packages</span>
-            <span class='pass'>✅ PASS</span>
+            <span class='pass'>PASS</span>
         </summary>
         <div class="output-content">
             <pre>≡ƒÉì WovenSnake | Weaving dependency tree for playground_automated
@@ -82,19 +83,38 @@
         </div>
     </details>    <details>
         <summary>
-            <span>3. Run Script (wovensnake run)</span>
-            <span class='pass'>✅ PASS</span>
+            <span>3. Add Package</span>
+            <span class='pass'>PASS</span>
         </summary>
         <div class="output-content">
-            <pre>C:\Users\jackd\Development\wovensnake\playground\test_app.py:3: DeprecationWarning: The '__version__' attribute is deprecated and will be removed in Flask 3.2. Use feature detection or 'importlib.metadata.version("flask")' instead.
-  print(f'SUCCESS: Requests {requests.__version__}, Flask {flask.__version__}')
-SUCCESS: Requests 2.32.5, Flask 3.1.2
+            <pre>≡ƒÉì WovenSnake | Adding package click
+
+Resolved click to version 8.3.1
+Updated wovenpkg.json
+Updating environment...
+≡ƒÉì WovenSnake | Weaving dependency tree for playground_automated
+
+
+Γ£¿ Done! Resolution complete.
 </pre>
         </div>
     </details>    <details>
         <summary>
-            <span>4. Remove Package</span>
-            <span class='pass'>✅ PASS</span>
+            <span>4. Run Script (woven run)</span>
+            <span class='pass'>PASS</span>
+        </summary>
+        <div class="output-content">
+            <pre>C:\Users\jackd\Development\wovensnake\playground\test_app.py:4: DeprecationWarning: The '__version__' attribute is deprecated and will be removed in Flask 3.2. Use feature detection or 'importlib.metadata.version("flask")' instead.
+  print(f'SUCCESS: Requests {requests.__version__}, Flask {flask.__version__}, Click {click.__version__}')
+C:\Users\jackd\Development\wovensnake\playground\test_app.py:4: DeprecationWarning: The '__version__' attribute is deprecated and will be removed in Click 9.1. Use feature detection or 'importlib.metadata.version("click")' instead.
+  print(f'SUCCESS: Requests {requests.__version__}, Flask {flask.__version__}, Click {click.__version__}')
+SUCCESS: Requests 2.32.5, Flask 3.1.2, Click 8.3.1
+</pre>
+        </div>
+    </details>    <details>
+        <summary>
+            <span>5. Remove Package</span>
+            <span class='pass'>PASS</span>
         </summary>
         <div class="output-content">
             <pre>≡ƒÉì WovenSnake | Removing package flask
@@ -109,14 +129,16 @@ Updating environment...
         </div>
     </details>    <details>
         <summary>
-            <span>5. Verify Pruning</span>
-            <span class='pass'>✅ PASS</span>
+            <span>6. Verify Pruning</span>
+            <span class='pass'>PASS</span>
         </summary>
         <div class="output-content">
             <pre>≡ƒÉì Project: playground_automated v0.1.0
-Installed Packages (5)
+Installed Packages (7)
  ΓÇó certifi v2025.11.12
  ΓÇó charset-normalizer v3.4.4
+ ΓÇó click v8.3.1
+ ΓÇó colorama v0.4.6
  ΓÇó idna v3.11
  ΓÇó requests v2.32.5
  ΓÇó urllib3 v2.6.2

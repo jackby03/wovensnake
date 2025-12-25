@@ -23,6 +23,13 @@ struct Cli {
 enum Commands {
     /// Initialize a new `WovenSnake` project
     Init,
+    /// Add a new package to the project
+    Add {
+        /// Name of the package to add
+        name: String,
+        /// Optional version of the package
+        version: Option<String>,
+    },
     /// Install dependencies from wovenpkg.json
     Install,
     /// Update dependencies to their latest versions
@@ -46,6 +53,11 @@ async fn main() {
         Commands::Init => {
             if let Err(e) = cli::init::execute() {
                 eprintln!("Error during init: {e}");
+            }
+        }
+        Commands::Add { name, version } => {
+            if let Err(e) = cli::add::execute(&name, version).await {
+                eprintln!("Error during add: {e}");
             }
         }
         Commands::Install => {
