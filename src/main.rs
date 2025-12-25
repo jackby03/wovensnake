@@ -4,7 +4,8 @@
     clippy::module_name_repetitions,
     clippy::missing_errors_doc,
     clippy::too_many_arguments,
-    clippy::missing_panics_doc
+    clippy::missing_panics_doc,
+    clippy::uninlined_format_args
 )]
 
 use clap::{Parser, Subcommand};

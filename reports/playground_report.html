@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WovenSnake Usability Report</title>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 40px 20px; background-color: #f8f9fa; color: #212529; line-height: 1.6; }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 15px; margin-bottom: 30px; letter-spacing: -0.5px; }
+        h2 { color: #34495e; margin-top: 40px; }
+        .summary { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; border-left: 5px solid #3498db; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 25px 0; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        th, td { padding: 15px 20px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #34495e; color: white; font-weight: 600; text-transform: uppercase; font-size: 0.85em; letter-spacing: 1px; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #fdfdfd; }
+        .pass { color: #27ae60; font-weight: 700; background-color: rgba(39, 174, 96, 0.1); padding: 5px 10px; border-radius: 20px; display: inline-block; font-size: 0.9em; }
+        .fail { color: #e74c3c; font-weight: 700; background-color: rgba(231, 76, 60, 0.1); padding: 5px 10px; border-radius: 20px; display: inline-block; font-size: 0.9em; }
+        pre { background: #2d3436; color: #dfe6e9; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9em; white-space: pre-wrap; word-wrap: break-word; }
+        details { background: white; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        summary { padding: 15px 20px; cursor: pointer; font-weight: 600; outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between; transition: background-color 0.2s; border-radius: 8px; }
+        summary:hover { background-color: #f8f9fa; }
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: '+'; font-size: 1.2em; color: #bdc3c7; }
+        details[open] summary { border-radius: 8px 8px 0 0; border-bottom: 1px solid #eee; }
+        details[open] summary::after { content: '-'; }
+        .output-content { padding: 0 20px 20px; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .footer { text-align: center; margin-top: 50px; color: #95a5a6; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>🐍 WovenSnake Usability Report</h1>
+    
+    <div class="summary">
+        <p><strong>Date:</strong> 12/24/2025 20:02:03</p>
+        <p><strong>Version:</strong> v0.1.0</p>
+        <p><strong>Environment:</strong> Windows (PowerShell)</p>
+    </div>
+
+    <h2>Test Execution Log</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Step</th>
+                <th>Action</th>
+                <th>Status</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>1</td><td>Init Project</td><td><span class='pass'>✅ PASS</span></td><td>0.11s</td></tr>
+<tr><td>2</td><td>Install Packages</td><td><span class='pass'>✅ PASS</span></td><td>14.47s</td></tr>
+<tr><td>3</td><td>Run Script (wovensnake run)</td><td><span class='pass'>✅ PASS</span></td><td>1.80s</td></tr>
+<tr><td>4</td><td>Remove Package</td><td><span class='pass'>✅ PASS</span></td><td>0.71s</td></tr>
+<tr><td>5</td><td>Verify Pruning</td><td><span class='pass'>✅ PASS</span></td><td>0.04s</td></tr>
+
+        </tbody>
+    </table>
+
+    <h2>Detailed Outputs</h2>
+        <details>
+        <summary>
+            <span>1. Init Project</span>
+            <span class='pass'>✅ PASS</span>
+        </summary>
+        <div class="output-content">
+            <pre>Successfully initialized WovenSnake project: wovenpkg.json created.
+</pre>
+        </div>
+    </details>    <details>
+        <summary>
+            <span>2. Install Packages</span>
+            <span class='pass'>✅ PASS</span>
+        </summary>
+        <div class="output-content">
+            <pre>≡ƒÉì WovenSnake | Weaving dependency tree for playground_automated
+
+
+Γ£¿ Done! Resolution complete.
+</pre>
+        </div>
+    </details>    <details>
+        <summary>
+            <span>3. Run Script (wovensnake run)</span>
+            <span class='pass'>✅ PASS</span>
+        </summary>
+        <div class="output-content">
+            <pre>C:\Users\jackd\Development\wovensnake\playground\test_app.py:3: DeprecationWarning: The '__version__' attribute is deprecated and will be removed in Flask 3.2. Use feature detection or 'importlib.metadata.version("flask")' instead.
+  print(f'SUCCESS: Requests {requests.__version__}, Flask {flask.__version__}')
+SUCCESS: Requests 2.32.5, Flask 3.1.2
+</pre>
+        </div>
+    </details>    <details>
+        <summary>
+            <span>4. Remove Package</span>
+            <span class='pass'>✅ PASS</span>
+        </summary>
+        <div class="output-content">
+            <pre>≡ƒÉì WovenSnake | Removing package flask
+
+Removed flask from wovenpkg.json
+Updating environment...
+≡ƒÉì WovenSnake | Weaving dependency tree for playground_automated
+
+
+Γ£¿ Done! Resolution complete.
+</pre>
+        </div>
+    </details>    <details>
+        <summary>
+            <span>5. Verify Pruning</span>
+            <span class='pass'>✅ PASS</span>
+        </summary>
+        <div class="output-content">
+            <pre>≡ƒÉì Project: playground_automated v0.1.0
+Installed Packages (5)
+ ΓÇó certifi v2025.11.12
+ ΓÇó charset-normalizer v3.4.4
+ ΓÇó idna v3.11
+ ΓÇó requests v2.32.5
+ ΓÇó urllib3 v2.6.2
+</pre>
+        </div>
+    </details>
+
+    <div class="footer">
+        Generated automatically by WovenSnake Validation Script
+    </div>
+</body>
+</html>
