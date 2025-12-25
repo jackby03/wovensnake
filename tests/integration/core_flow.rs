@@ -43,9 +43,7 @@ fn test_lockfile_integrity() {
     let mut lockfile = Lockfile::new("test-project", "0.1.0");
     lockfile.packages.insert("requests".to_string(), LockedPackage {
         version: "2.25.1".to_string(),
-        url: "https://example.com/requests.whl".to_string(),
-        filename: "requests-2.25.1-py3-none-any.whl".to_string(),
-        sha256: "deadbeef".to_string(),
+        artifacts: vec![],
         dependencies: vec!["urllib3".to_string(), "chardet".to_string()],
     });
     

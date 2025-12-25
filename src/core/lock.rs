@@ -14,10 +14,18 @@ pub struct Lockfile {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LockedPackage {
     pub version: String,
+    // Support multiple artifacts per version (wheels for different OS/Arch, sdist)
+    #[serde(default)]
+    pub artifacts: Vec<Artifact>,
+    pub dependencies: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Artifact {
     pub url: String,
     pub filename: String,
     pub sha256: String,
-    pub dependencies: Vec<String>,
+    pub platform: String, // e.g. "win_amd64", "manylinux", "any"
 }
 
 impl Lockfile {

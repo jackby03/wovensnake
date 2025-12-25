@@ -1,6 +1,7 @@
 use crate::core::config;
-use crate::core::lock::{Lockfile, LockedPackage};
+use crate::core::lock::{Lockfile, LockedPackage, Artifact};
 use crate::core::cache::Cache;
+use crate::core::selection::select_artifact;
 use crate::dependencies::package;
 use indicatif::{ProgressBar, ProgressStyle, MultiProgress};
 use std::collections::{HashSet, HashMap, VecDeque};
@@ -104,26 +105,29 @@ async fn install_from_lock(
                 pb.set_style(ProgressStyle::with_template("{spinner:.cyan} {msg}").unwrap().tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"));
                 pb.set_message(format!("Syncing: {}", name));
 
-                let dest_path = packages_dir.join(&pkg.filename);
-                if cache.contains(&pkg.filename, &pkg.sha256) {
-                    let _ = cache.link_to_project(&pkg.filename, &pkg.sha256, &packages_dir);
+        if let Some(artifact) = select_artifact(&pkg.artifacts, "win_amd64") {
+             // ... existing download logic using artifact.url etc ...
+             let dest_path = packages_dir.join(&artifact.filename);
+                if cache.contains(&artifact.filename, &artifact.sha256) {
+                    let _ = cache.link_to_project(&artifact.filename, &artifact.sha256, &packages_dir);
                 } else if !dest_path.exists() {
-                    if let Ok(res) = reqwest::get(&pkg.url).await {
+                    if let Ok(res) = reqwest::get(&artifact.url).await {
                         if let Ok(data) = res.bytes().await {
                             let hash = format!("{:x}", Sha256::digest(&data));
-                            if hash == pkg.sha256 {
-                                let _ = cache.save(&pkg.filename, &pkg.sha256, &data);
+                            if hash == artifact.sha256 {
+                                let _ = cache.save(&artifact.filename, &artifact.sha256, &data);
                                 let _ = std::fs::write(&dest_path, &data);
                             }
                         }
                     }
                 }
 
-                if pkg.filename.ends_with(".whl") {
+                if artifact.filename.ends_with(".whl") {
                     let _ = package::extract_wheel(&dest_path, &site_packages);
                 } else {
                     let _ = package::extract_targz(&dest_path, &site_packages);
                 }
+        }
                 pb.finish_with_message(format!("\x1b[32m✓\x1b[0m {}", name));
                 count.fetch_add(1, Ordering::SeqCst);
             }
@@ -170,28 +174,49 @@ async fn resolve_and_install_final(
             }
         }
 
-        let download = info.urls.iter()
-            .find(|u| u.packagetype == "bdist_wheel" && (u.filename.contains("none-any") || u.filename.contains("win_amd64")))
-            .or_else(|| info.urls.iter().find(|u| u.packagetype == "bdist_wheel"))
-            .or_else(|| info.urls.iter().find(|u| u.packagetype == "sdist"));
+        // Collect ALL artifacts for the Lockfile (Multiplatform support)
+        let mut artifacts: Vec<Artifact> = Vec::new();
+        for url in &info.urls {
+            if url.packagetype == "bdist_wheel" {
+                 // Simplistic platform detection from filename
+                 let platform = if url.filename.contains("win_amd64") { "win_amd64".to_string() }
+                 else if url.filename.contains("manylinux") { "manylinux".to_string() }
+                 else if url.filename.contains("any") { "any".to_string() }
+                 else { "other".to_string() };
+                 
+                 artifacts.push(Artifact {
+                     url: url.url.clone(),
+                     filename: url.filename.clone(),
+                     sha256: url.digests.sha256.clone(),
+                     platform,
+                 });
+            } else if url.packagetype == "sdist" {
+                 artifacts.push(Artifact {
+                     url: url.url.clone(),
+                     filename: url.filename.clone(),
+                     sha256: url.digests.sha256.clone(),
+                     platform: "source".to_string(),
+                 });
+            }
+        }
+        
+        lockfile.packages.insert(info.info.name.clone(), LockedPackage {
+            version: info.info.version.clone(),
+            artifacts: artifacts.clone(),
+            dependencies: vec![],
+        });
 
-        if let Some(pkg_url) = download {
-            lockfile.packages.insert(info.info.name.clone(), LockedPackage {
-                version: info.info.version.clone(),
-                url: pkg_url.url.clone(),
-                filename: pkg_url.filename.clone(),
-                sha256: pkg_url.digests.sha256.clone(),
-                dependencies: vec![],
-            });
-
-            if !local_installed.contains(&name_lower) {
+        // Resolve local installation
+        let current_platform = if cfg!(windows) { "win_amd64" } else { "manylinux" }; // simplified
+        if let Some(pkg_url) = select_artifact(&artifacts, current_platform) {
+             if !local_installed.contains(&name_lower) {
                 let dest_path = packages_dir.join(&pkg_url.filename);
-                if !cache.contains(&pkg_url.filename, &pkg_url.digests.sha256) && !dest_path.exists() {
+                if !cache.contains(&pkg_url.filename, &pkg_url.sha256) && !dest_path.exists() {
                     package::download_package(&pkg_url.url, &dest_path).await?;
                     let data = std::fs::read(&dest_path)?;
-                    let _ = cache.save(&pkg_url.filename, &pkg_url.digests.sha256, &data);
-                } else if cache.contains(&pkg_url.filename, &pkg_url.digests.sha256) {
-                    let _ = cache.link_to_project(&pkg_url.filename, &pkg_url.digests.sha256, packages_dir);
+                    let _ = cache.save(&pkg_url.filename, &pkg_url.sha256, &data);
+                } else if cache.contains(&pkg_url.filename, &pkg_url.sha256) {
+                    let _ = cache.link_to_project(&pkg_url.filename, &pkg_url.sha256, packages_dir);
                 }
 
                 if pkg_url.filename.ends_with(".whl") {

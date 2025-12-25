@@ -55,10 +55,10 @@ fn test_lockfile_pruning_logic() {
     // Determine if we can identify packages to remove
     let mut lockfile = Lockfile::new("test", "0.1.0");
     lockfile.packages.insert("flask".into(), LockedPackage {
-         version: "2.0".into(), url: "x".into(), filename: "x".into(), sha256: "x".into(), dependencies: vec![] 
+         version: "2.0".into(), artifacts: vec![], dependencies: vec![] 
     });
     lockfile.packages.insert("requests".into(), LockedPackage {
-         version: "2.25".into(), url: "y".into(), filename: "y".into(), sha256: "y".into(), dependencies: vec![] 
+         version: "2.25".into(), artifacts: vec![], dependencies: vec![] 
     });
 
     // Simulating "List" command logic
