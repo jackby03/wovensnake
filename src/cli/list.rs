@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::path::Path;
+
 use crate::core::config;
 use crate::core::lock::Lockfile;
 
@@ -11,7 +12,7 @@ pub fn execute() -> Result<(), Box<dyn Error>> {
     if lock_path.exists() {
         let lockfile = Lockfile::read(lock_path)?;
         println!("\x1b[90mInstalled Packages ({})\x1b[0m", lockfile.packages.len());
-        
+
         // Sort for nice output
         let mut pkgs: Vec<_> = lockfile.packages.iter().collect();
         pkgs.sort_by_key(|k| k.0);
@@ -23,7 +24,7 @@ pub fn execute() -> Result<(), Box<dyn Error>> {
         println!("No lockfile found. Run 'wovensnake install' to weave dependencies.");
         println!("\x1b[90mDeclared Dependencies:\x1b[0m");
         for (name, ver) in config.dependencies {
-            println!(" - {} {}", name, ver);
+            println!(" - {name} {ver}");
         }
     }
 

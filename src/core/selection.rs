@@ -5,13 +5,15 @@ pub fn select_artifact<'a>(artifacts: &'a [Artifact], platform: &str) -> Option<
     if let Some(art) = artifacts.iter().find(|a| a.platform == platform) {
         return Some(art);
     }
-    
+
     // 2. Try "any" (universal wheel)
     if let Some(art) = artifacts.iter().find(|a| a.platform == "any") {
         return Some(art);
     }
-    
+
     // 3. Fallback to sdist (usually platform="source" or similar, here we assume empty or specific tag)
     // For now, let's look for "sdist" or just take the first source-like thing.
-    artifacts.iter().find(|a| a.platform == "source" || a.filename.ends_with(".tar.gz"))
+    artifacts
+        .iter()
+        .find(|a| a.platform == "source" || a.filename.ends_with(".tar.gz"))
 }

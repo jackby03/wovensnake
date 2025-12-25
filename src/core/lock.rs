@@ -45,7 +45,7 @@ impl Lockfile {
 
     pub fn read(path: &Path) -> Result<Self, Box<dyn Error>> {
         let content = fs::read_to_string(path)?;
-        let lockfile: Lockfile = serde_json::from_str(&content)?;
+        let lockfile: Self = serde_json::from_str(&content)?;
         Ok(lockfile)
     }
 }
