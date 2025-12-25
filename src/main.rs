@@ -49,6 +49,9 @@ enum Commands {
         /// Also clear the global cache
         #[arg(long)]
         all: bool,
+        /// Also clear managed Python versions
+        #[arg(long)]
+        python: bool,
     },
 }
 
@@ -93,8 +96,8 @@ async fn main() {
                 ux::print_error(format!("Failed to list packages: {e}"));
             }
         }
-        Commands::Clean { all } => {
-            if let Err(e) = cli::clean::execute(all) {
+        Commands::Clean { all, python } => {
+            if let Err(e) = cli::clean::execute(all, python) {
                 ux::print_error(format!("Clean failed: {e}"));
             }
         }

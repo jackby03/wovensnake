@@ -2326,6 +2326,7 @@ dependencies = [
  "indicatif",
  "log",
  "mockito",
+ "once_cell",
  "pep440",
  "pep508_rs",
  "reqwest",

@@ -5,8 +5,9 @@ use std::path::Path;
 use crate::cli::ux;
 use crate::core::cache::Cache;
 use crate::core::config;
+use crate::core::python_manager;
 
-pub fn execute(all: bool) -> Result<(), Box<dyn Error>> {
+pub fn execute(all: bool, python: bool) -> Result<(), Box<dyn Error>> {
     ux::print_header("Cleaning project environment...");
 
     // 1. Read config to find venv
@@ -38,6 +39,12 @@ pub fn execute(all: bool) -> Result<(), Box<dyn Error>> {
         ux::print_info("Clearing global cache...");
         let cache = Cache::init()?;
         cache.clear()?;
+    }
+
+    // 6. Optional: Clear managed Python versions
+    if python {
+        ux::print_info("Clearing managed Python versions...");
+        python_manager::clear_managed_versions()?;
     }
 
     ux::print_success("Project cleaned successfully.");

@@ -21,6 +21,9 @@
 /venv/
 wovenpkg.lock
 wovenpkg.json
+/\.woven/
+/reports
+reports/playground_report.html
 
 # ----------------------------------------------------------------------------
 # SYSTEM FILES
@@ -50,3 +53,4 @@ err_*
 status.*
 errors.*
 *out*
+playground_*/

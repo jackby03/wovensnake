@@ -13,11 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **UX Module**: Standardized CLI output with colors, headers, and consistent status icons.
 - **Global Cache**: Implemented a content-addressable global cache in `~/.wovensnake/cache` for faster installs across projects.
 - **Multi-platform Support**: Improved PATH handling and dynamic `site-packages` resolution for Windows and Unix-like systems.
+- **Python Distribution Manager**: Embedded a metadata catalog plus `scripts/fetch_python_metadata.py` so `python_manager` can resolve the latest assets from `python-build-standalone`, cache the URLs, and run UV-style post-install patches (EXTERNALLY-MANAGED + canonical executables).
 
 ### Changed
 - **Binary Name**: Renamed the CLI command from `wovensnake` to `woven` for a more concise experience.
 - **Lockfile Logic**: Enhanced lockfile synchronization to be more robust and handle platform-specific artifacts better.
 - **UX Improvements**: Removed emojis from automated reports for a more professional look.
+- **Validation Script**: Playground automation now captures stdout/stderr with `RUST_BACKTRACE=1`, marks non-zero steps as failures, and destroys the temporary directory it created.
 
 ### Fixed
 - Hardcoded `python3.10` paths in installation logic.

@@ -18,9 +18,6 @@ use crate::dependencies::package;
 pub async fn execute() -> Result<(), Box<dyn Error>> {
     let config = config::read_config("wovenpkg.json")?;
 
-    // Validate Python version before proceeding
-    crate::core::python::validate_python_version(&config.python_version).await?;
-
     let lock_path = Path::new("wovenpkg.lock");
     let cache = Cache::init()?;
 
@@ -30,23 +27,28 @@ pub async fn execute() -> Result<(), Box<dyn Error>> {
     }
 
     let venv_base = Path::new(&config.virtual_environment);
-    if !venv_base.exists() {
-        crate::core::venv::create_venv(venv_base, &config.python_version).await?;
-    } else {
+    if venv_base.exists() {
         // Check if existing venv matches the required version
         match crate::core::venv::get_venv_python_version(venv_base) {
             Ok(version) if version != config.python_version => {
-                ux::print_warning(&format!(
+                ux::print_warning(format!(
                     "Existing virtual environment uses Python {}, but {} is required by wovenpkg.json.",
                     version, config.python_version
                 ));
                 ux::print_info("Consider running 'woven clean' and then 'woven install' to recreate the environment.");
             }
             Err(e) => {
-                ux::print_warning(&format!("Could not verify virtual environment Python version: {e}"));
+                ux::print_warning(format!("Could not verify virtual environment Python version: {e}"));
             }
             _ => {} // Versions match
         }
+    }
+
+    // Validate Python version before proceeding (or creating venv)
+    crate::core::python::validate_python_version(&config.python_version).await?;
+
+    if !venv_base.exists() {
+        crate::core::venv::create_venv(venv_base, &config.python_version).await?;
     }
 
     let python_dir = format!("python{}", config.python_version);

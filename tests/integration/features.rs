@@ -81,7 +81,7 @@ async fn test_add_logic_simulation() {
 #[test]
 fn test_lockfile_pruning_logic() {
     // Determine if we can identify packages to remove
-    let mut lockfile = Lockfile::new("test", "0.1.0");
+    let mut lockfile = Lockfile::new("test", "0.1.0", "3.10");
     lockfile.packages.insert(
         "flask".into(),
         LockedPackage {
