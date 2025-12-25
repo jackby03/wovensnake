@@ -24,11 +24,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
       
       - name: Install Rust Toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
           components: rustfmt, clippy
 
       - name: Check Formatting
@@ -51,11 +55,14 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
       
       - name: Install Rust Toolchain
-        uses: dtolnay/rust-toolchain@master
-        with:
-           toolchain: stable
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Cache dependencies
         uses: actions/cache@v3
