@@ -1,5 +1,5 @@
 <div align="center">
-  <img src=".github/assets/logo.png" alt="WovenSnake Cozy Logo" width="200">
+  <img src=".github/assets/logo.png" alt="WovenSnake Cozy Logo" width="500">
   <h1>🧶 WovenSnake</h1>
 </div>
 
@@ -18,8 +18,9 @@
 ## 🍵 Why WovenSnake?
 
 Managing packages shouldn't be a tangle. WovenSnake keeps things organized:
-*   **⚡ Swift Knitting**: Parallel resolution that finishes before your tea is ready.
+*   **⚡ Swift Knitting**: Parallel resolution and installation that finishes before your tea is ready.
 *   **🔒 Secure Stitching**: Deterministic `wovenpkg.lock` ensures every install is identical.
+*   **📦 Global Cache**: Shared storage in `~/.wovensnake/cache` to avoid downloading the same package twice.
 *   **🧶 Self-Mending**: Automatically removes loose threads (unused packages) to keep your project clean.
 *   **🏠 Zero-Config Home**: Creates virtual environments automatically, so your packages have a safe place to live.
 
@@ -41,7 +42,7 @@ iwr -useb https://raw.githubusercontent.com/jackby03/wovensnake/main/scripts/ins
 
 ### 🦀 From Source (Rustaceans)
 ```bash
-cargo install wovensnake
+cargo install --path .
 ```
 
 ---
@@ -54,22 +55,40 @@ Prepares `wovenpkg.json` for your project.
 woven init
 ```
 
-### 2. Knit Dependencies (`install`)
+### 2. Add a New Thread (`add`)
+Adds a package from PyPI to your project and installs it immediately.
+```bash
+woven add requests
+```
+
+### 3. Knit Dependencies (`install`)
 Reads your pattern, gathers materials, and weaves the environment.
 ```bash
 woven install
 ```
 
-### 3. Tidy Up (`remove`)
+### 4. Run in the Nest (`run`)
+Execute any command within the context of your virtual environment.
+```bash
+woven run python main.py
+```
+
+### 5. Tidy Up (`remove`)
 Gently removes a package and its unused threads.
 ```bash
 woven remove flask
 ```
 
-### 4. View the Tapestry (`list`)
+### 6. View the Tapestry (`list`)
 Admire the packages currently woven into your project.
 ```bash
 woven list
+```
+
+### 7. Fresh Start (`clean`)
+Clears the virtual environment and local packages. Use `--all` to clear the global cache too.
+```bash
+woven clean
 ```
 
 ---
