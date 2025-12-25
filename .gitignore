@@ -1,27 +1,51 @@
-# Compiled Rust files
+# ----------------------------------------------------------------------------
+# RUST BUILD ARTIFACTS
+# ----------------------------------------------------------------------------
 /target/
+**/*.rs.bk
 
-# Rust dependencies
-/Cargo.lock
+# ----------------------------------------------------------------------------
+# DEPENDENCY LOCK FILES
+# ----------------------------------------------------------------------------
+# Note: For libraries, Cargo.lock should be ignored.
+# For binaries (executables), it should be committed to ensure reproducibility.
+# We are a binary, so we keep Cargo.lock. 
+# /Cargo.lock
 
-# VS Code settings folder
-.vscode/
+# ----------------------------------------------------------------------------
+# WOVENSNAKE LOCAL ARTIFACTS (Test/Runtime data)
+# ----------------------------------------------------------------------------
+# These files are generated when running the tool in the development root.
+# We ignore them so they don't pollute the source repository.
+/packages/
+/venv/
+wovenpkg.lock
+wovenpkg.json
 
-# System files (macOS)
+# ----------------------------------------------------------------------------
+# SYSTEM FILES
+# ----------------------------------------------------------------------------
 .DS_Store
-
-# System files (Windows)
 Thumbs.db
+Desktop.ini
+._*
 
-# IDE files
+# ----------------------------------------------------------------------------
+# IDE & EDITOR SETTINGS
+# ----------------------------------------------------------------------------
 .idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.iml
 
-# Node modules (if applicable for any front-end work)
-node_modules/
-
-# Generated files
+# ----------------------------------------------------------------------------
+# LOGS & TEMPORARY FILES
+# ----------------------------------------------------------------------------
 *.log
 *.tmp
-
-/packages
-/venv
+build_*
+err_*
+status.*
+errors.*

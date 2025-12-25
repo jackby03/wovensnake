@@ -34,6 +34,13 @@ pub struct Digests {
     pub sha256: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PypiFullInfo {
+    pub info: Info,
+    pub releases: std::collections::HashMap<String, Vec<PackageUrl>>,
+}
+
+
 pub async fn fetch_package_info(name: &str, version: Option<&str>) -> Result<PypiPackageInfo, Box<dyn Error>> {
     let url = match version {
         Some(v) => format!("https://pypi.org/pypi/{}/{}/json", name, v),
@@ -49,6 +56,18 @@ pub async fn fetch_package_info(name: &str, version: Option<&str>) -> Result<Pyp
         Err(format!("Could not find package {} on PyPI", name).into())
     }
 }
+
+pub async fn fetch_full_package_info(name: &str) -> Result<PypiFullInfo, Box<dyn Error>> {
+    let url = format!("https://pypi.org/pypi/{}/json", name);
+    let response = reqwest::get(url).await?;
+    if response.status().is_success() {
+        let info: PypiFullInfo = response.json().await?;
+        Ok(info)
+    } else {
+        Err(format!("Could not find package {} on PyPI", name).into())
+    }
+}
+
 
 pub async fn download_package(url: &str, dest_path: &Path) -> Result<(), Box<dyn Error>> {
     let response = reqwest::get(url).await?;

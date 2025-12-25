@@ -17,6 +17,17 @@ enum Commands {
     Install,
     /// Update dependencies to their latest versions
     Update,
+    /// Run a command within the virtual environment
+    Run {
+        #[arg(trailing_var_arg = true)]
+        args: Vec<String>,
+    },
+    /// Remove a package
+    Remove {
+        name: String,
+    },
+    /// List installed packages
+    List,
 }
 
 #[tokio::main]
@@ -35,7 +46,25 @@ async fn main() {
             }
         }
         Commands::Update => {
-            println!("Update command not yet implemented.");
+            if let Err(e) = cli::update::execute().await {
+                eprintln!("Error during update: {}", e);
+            }
+        }
+        Commands::Run { args } => {
+             if let Err(e) = cli::run::execute(&args) {
+                eprintln!("Error during run: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Commands::Remove { name } => {
+            if let Err(e) = cli::remove::execute(&name).await {
+                eprintln!("Error during remove: {}", e);
+            }
+        }
+        Commands::List => {
+             if let Err(e) = cli::list::execute() {
+                eprintln!("Error during list: {}", e);
+            }
         }
     }
 }
