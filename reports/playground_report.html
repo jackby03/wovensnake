@@ -33,7 +33,7 @@
     <h1>WovenSnake Usability Report</h1>
     
     <div class="summary">
-        <p><strong>Date:</strong> 12/25/2025 02:58:34</p>
+        <p><strong>Date:</strong> 12/25/2025 03:02:12</p>
         <p><strong>Version:</strong> v0.1.0</p>
         <p><strong>Environment:</strong> Windows (PowerShell)</p>
     </div>
@@ -50,11 +50,12 @@
         </thead>
         <tbody>
             <tr><td>1</td><td>Init Project</td><td><span class='pass'>PASS</span></td><td>0.02s</td></tr>
-<tr><td>2</td><td>Install Packages</td><td><span class='pass'>PASS</span></td><td>10.12s</td></tr>
-<tr><td>3</td><td>Add Package</td><td><span class='pass'>PASS</span></td><td>0.65s</td></tr>
-<tr><td>4</td><td>Run Script (woven run)</td><td><span class='pass'>PASS</span></td><td>1.88s</td></tr>
+<tr><td>2</td><td>Install Packages</td><td><span class='pass'>PASS</span></td><td>9.77s</td></tr>
+<tr><td>3</td><td>Add Package</td><td><span class='pass'>PASS</span></td><td>0.67s</td></tr>
+<tr><td>4</td><td>Run Script (woven run)</td><td><span class='pass'>PASS</span></td><td>1.43s</td></tr>
 <tr><td>5</td><td>Remove Package</td><td><span class='pass'>PASS</span></td><td>0.47s</td></tr>
 <tr><td>6</td><td>Verify Pruning</td><td><span class='pass'>PASS</span></td><td>0.02s</td></tr>
+<tr><td>7</td><td>Clean Project</td><td><span class='pass'>PASS</span></td><td>0.39s</td></tr>
 
         </tbody>
     </table>
@@ -150,6 +151,21 @@ SUCCESS: Requests 2.32.5, Flask 3.1.2, Click 8.3.1
  ΓÇó idna v3.11
  ΓÇó requests v2.32.5
  ΓÇó urllib3 v2.6.2
+</pre>
+        </div>
+    </details>    <details>
+        <summary>
+            <span>7. Clean Project</span>
+            <span class='pass'>PASS</span>
+        </summary>
+        <div class="output-content">
+            <pre>
+≡ƒÉì WovenSnake | Cleaning project environment...
+
+ΓÇó Removing virtual environment: venv
+ΓÇó Removing local packages directory...
+ΓÇó Removing lockfile...
+Γ£ô Project cleaned successfully.
 </pre>
         </div>
     </details>

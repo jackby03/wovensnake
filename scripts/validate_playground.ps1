@@ -19,7 +19,7 @@ if (-not (Test-Path $ReportsDir)) {
 }
 
 # 1. Cleanup
-Write-Host "`n[1/8] Cleaning up previous playground..." -ForegroundColor Yellow
+Write-Host "`n[1/9] Cleaning up previous playground..." -ForegroundColor Yellow
 if (Test-Path $PlaygroundDir) {
     Remove-Item -Recurse -Force $PlaygroundDir
 }
@@ -126,6 +126,10 @@ $Cleaned = $ListOutput -notmatch "Flask"
 $ResList.Check = $ResList.Success -and $Cleaned
 Add-Result "Verify Pruning" $ResList $ResList.Duration $ResList.Output
 
+# 9. Clean
+$ResClean = Run-Step "Clean Project" $BinaryPath @("clean")
+Add-Result "Clean Project" $ResClean $ResClean.Duration $ResClean.Output
+
 # Generate HTML
 $HtmlContent = @"
 <!DOCTYPE html>
@@ -197,7 +201,7 @@ Set-Content -Path $ReportFile -Value $HtmlContent
 Write-Host "`nReport generated at $ReportFile" -ForegroundColor Cyan
 
 # Final Cleanup
-Write-Host "`n[8/8] Destroying playground..." -ForegroundColor Yellow
+Write-Host "`n[9/9] Destroying playground..." -ForegroundColor Yellow
 Set-Location $ProjectRoot
 if (Test-Path $PlaygroundDir) {
     Remove-Item -Recurse -Force $PlaygroundDir

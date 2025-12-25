@@ -44,6 +44,12 @@ enum Commands {
     Remove { name: String },
     /// List installed packages
     List,
+    /// Clean project dependencies and virtual environment
+    Clean {
+        /// Also clear the global cache
+        #[arg(long)]
+        all: bool,
+    },
 }
 
 #[tokio::main]
@@ -85,6 +91,11 @@ async fn main() {
         Commands::List => {
             if let Err(e) = cli::list::execute() {
                 ux::print_error(format!("Failed to list packages: {e}"));
+            }
+        }
+        Commands::Clean { all } => {
+            if let Err(e) = cli::clean::execute(all) {
+                ux::print_error(format!("Clean failed: {e}"));
             }
         }
     }
