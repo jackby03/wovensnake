@@ -1,11 +1,15 @@
-use crate::core::config;
 use std::error::Error;
-use std::path::Path;
 use std::fs;
+use std::path::Path;
+
+use crate::core::config;
 
 pub async fn execute() -> Result<(), Box<dyn Error>> {
     let config = config::read_config("wovenpkg.json")?;
-    println!("\x1b[1m\x1b[36m🐍 WovenSnake\x1b[0m \x1b[90m| Updating dependencies for {}\x1b[0m\n", config.name);
+    println!(
+        "\x1b[1m\x1b[36m🐍 WovenSnake\x1b[0m \x1b[90m| Updating dependencies for {}\x1b[0m\n",
+        config.name
+    );
 
     let lock_path = Path::new("wovenpkg.lock");
     if lock_path.exists() {

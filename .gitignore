@@ -49,3 +49,4 @@ build_*
 err_*
 status.*
 errors.*
+*out*
