@@ -1,11 +1,11 @@
+use flate2::read::GzDecoder;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::fs;
 use std::io;
 use std::path::Path;
-use zip::ZipArchive;
-use flate2::read::GzDecoder;
 use tar::Archive;
+use zip::ZipArchive;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PypiPackageInfo {
@@ -34,11 +34,17 @@ pub struct Digests {
     pub sha256: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PypiFullInfo {
+    pub info: Info,
+    pub releases: std::collections::HashMap<String, Vec<PackageUrl>>,
+}
+
 pub async fn fetch_package_info(name: &str, version: Option<&str>) -> Result<PypiPackageInfo, Box<dyn Error>> {
-    let url = match version {
-        Some(v) => format!("https://pypi.org/pypi/{}/{}/json", name, v),
-        None => format!("https://pypi.org/pypi/{}/json", name),
-    };
+    let url = version.map_or_else(
+        || format!("https://pypi.org/pypi/{name}/json"),
+        |v| format!("https://pypi.org/pypi/{name}/{v}/json"),
+    );
 
     let response = reqwest::get(url).await?;
 
@@ -46,7 +52,18 @@ pub async fn fetch_package_info(name: &str, version: Option<&str>) -> Result<Pyp
         let info: PypiPackageInfo = response.json().await?;
         Ok(info)
     } else {
-        Err(format!("Could not find package {} on PyPI", name).into())
+        Err(format!("Could not find package {name} on PyPI").into())
+    }
+}
+
+pub async fn fetch_full_package_info(name: &str) -> Result<PypiFullInfo, Box<dyn Error>> {
+    let url = format!("https://pypi.org/pypi/{name}/json");
+    let response = reqwest::get(url).await?;
+    if response.status().is_success() {
+        let info: PypiFullInfo = response.json().await?;
+        Ok(info)
+    } else {
+        Err(format!("Could not find package {name} on PyPI").into())
     }
 }
 
@@ -77,7 +94,7 @@ pub fn extract_wheel(wheel_path: &Path, dest_path: &Path) -> Result<(), Box<dyn 
         } else {
             if let Some(p) = outpath.parent() {
                 if !p.exists() {
-                    fs::create_dir_all(&p)?;
+                    fs::create_dir_all(p)?;
                 }
             }
             let mut outfile = fs::File::create(&outpath)?;
@@ -103,7 +120,9 @@ pub fn generate_scripts(dist_info_path: &Path, scripts_dir: &Path) -> Result<(),
 
     for line in content.lines() {
         let line = line.trim();
-        if line.is_empty() { continue; }
+        if line.is_empty() {
+            continue;
+        }
 
         if line == "[console_scripts]" {
             in_console_scripts = true;
@@ -116,33 +135,36 @@ pub fn generate_scripts(dist_info_path: &Path, scripts_dir: &Path) -> Result<(),
         if in_console_scripts {
             if let Some((name, target)) = line.split_once('=') {
                 let name = name.trim();
-                let target = target.trim().split(' ').next().unwrap_or(target.trim()); // Ignore [extras]
-                
+                let target = target.trim().split(' ').next().unwrap_or_else(|| target.trim()); // Ignore [extras]
+
                 if let Some((module, function)) = target.split_once(':') {
                     let script_content = format!(
-"import sys
-from {} import {}
+                        "import sys
+from {module} import {function}
 if __name__ == '__main__':
-    sys.exit({}())", module, function, function);
+    sys.exit({function}())"
+                    );
 
                     // Create .py script
-                    let script_path = scripts_dir.join(format!("{}-script.py", name));
+                    let script_path = scripts_dir.join(format!("{name}-script.py"));
                     fs::write(&script_path, script_content)?;
 
                     // Create .bat for Windows
                     if cfg!(windows) {
                         let bat_content = format!(
-"@echo off
+                            "@echo off
 set PYTHONPATH=%~dp0\\..\\Lib\\site-packages;%PYTHONPATH%
-python \"%~dp0\\{}-script.py\" %*", name);
-                        let bat_path = scripts_dir.join(format!("{}.bat", name));
+python \"%~dp0\\{name}-script.py\" %*"
+                        );
+                        let bat_path = scripts_dir.join(format!("{name}.bat"));
                         fs::write(bat_path, bat_content)?;
                     } else {
                         // For Unix
                         let sh_content = format!(
-"#!/bin/sh
+                            "#!/bin/sh
 export PYTHONPATH=\"$(dirname \"$0\")/../lib/python3.10/site-packages:$PYTHONPATH\"
-python3 \"$(dirname \"$0\")/{}-script.py\" \"$@\"", name);
+python3 \"$(dirname \"$0\")/{name}-script.py\" \"$@\""
+                        );
                         let sh_path = scripts_dir.join(name);
                         fs::write(&sh_path, sh_content)?;
                     }
@@ -158,12 +180,12 @@ pub fn extract_targz(path: &Path, dest_path: &Path) -> Result<(), Box<dyn Error>
     let tar_gz = fs::File::open(path)?;
     let tar = GzDecoder::new(tar_gz);
     let mut archive = Archive::new(tar);
-    
+
     // Most sdists have a single top-level directory. We want to extract its contents directly if possible,
     // but the 'tar' crate doesn't make it super easy to strip levels without manual iteration.
     // For now, we extract everything.
     archive.unpack(dest_path)?;
-    
+
     // Post-extraction: Find if there's a nested folder that should be moved up.
     // E.g. site-packages/package-1.0.0/package -> site-packages/package
     if let Ok(entries) = fs::read_dir(dest_path) {
@@ -172,13 +194,13 @@ pub fn extract_targz(path: &Path, dest_path: &Path) -> Result<(), Box<dyn Error>
             if path.is_dir() {
                 let name = entry.file_name().into_string().unwrap_or_default();
                 if name.contains('-') {
-                     // Potential sdist root like atomicwrites-1.4.1
-                     // We could move its children up, but that's complex to do during installation safely.
-                     // The user can always manually fix or we can implement a .pth generator.
+                    // Potential sdist root like atomicwrites-1.4.1
+                    // We could move its children up, but that's complex to do during installation safely.
+                    // The user can always manually fix or we can implement a .pth generator.
                 }
             }
         }
     }
-    
+
     Ok(())
 }

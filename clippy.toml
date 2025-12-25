@@ -1,0 +1,10 @@
+# Clippy configuration
+avoid-breaking-exported-api = false
+disallowed-names = ["foo", "bar", "baz", "qux"]
+cognitive-complexity-threshold = 30
+enum-variant-name-threshold = 3
+large-error-threshold = 128
+literal-representation-threshold = 16
+too-many-arguments-threshold = 7
+too-many-lines-threshold = 500
+allow-private-module-inception = true
