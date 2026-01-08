@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 $Repo = "jackby03/wovensnake"
 $InstallDir = "$env:USERPROFILE\.wovensnake\bin"
 $ExeName = "woven.exe"
-$AssetUrl = "https://github.com/$Repo/releases/latest/download/wovensnake-windows-amd64.exe"
+$AssetUrl = "https://github.com/$Repo/releases/latest/download/woven-windows-amd64.exe"
 
 Write-Host "🧶 WovenSnake Installer" -ForegroundColor Green
 Write-Host "-----------------------" -ForegroundColor DarkGray
