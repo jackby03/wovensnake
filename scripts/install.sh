@@ -11,8 +11,8 @@ echo "-----------------------"
 # 1. Detect OS
 OS="$(uname -s)"
 case "$OS" in
-    Linux*)     ASSET="wovensnake-linux-amd64";;
-    Darwin*)    ASSET="wovensnake-macos-amd64";;
+    Linux*)     ASSET="woven-linux-amd64";;
+    Darwin*)    ASSET="woven-macos-amd64";;
     *)          echo "Unsupported OS: $OS"; exit 1;;
 esac
 
@@ -54,4 +54,4 @@ fi
 
 echo ""
 echo "✨ WovenSnake successfully installed!"
-echo "Run 'wovensnake --help' to start."
+echo "Run 'woven --help' to start."
