@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------------
 # Note: For libraries, Cargo.lock should be ignored.
 # For binaries (executables), it should be committed to ensure reproducibility.
-# We are a binary, so we keep Cargo.lock. 
+# We are a binary, so we keep Cargo.lock.
 # /Cargo.lock
 
 # ----------------------------------------------------------------------------
@@ -21,9 +21,12 @@
 /venv/
 wovenpkg.lock
 wovenpkg.json
-/\.woven/
+/.woven/
 /reports/
-reports/playground_report.html
+/metadata/
+/demo*/
+/.agent/
+SKILL.md
 
 # ----------------------------------------------------------------------------
 # SYSTEM FILES

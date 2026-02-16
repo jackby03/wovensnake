@@ -16,7 +16,12 @@ pub fn execute(args: &[String]) -> Result<(), Box<dyn Error>> {
     let python_path = if cfg!(windows) {
         venv_base.join("Scripts").join("python.exe")
     } else {
-        venv_base.join("bin").join("python")
+        let p = venv_base.join("bin").join("python");
+        if p.exists() {
+            p
+        } else {
+            venv_base.join("bin").join("python3")
+        }
     };
 
     if !python_path.exists() {

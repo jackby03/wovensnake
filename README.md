@@ -26,18 +26,28 @@ Managing packages shouldn't be a tangle. WovenSnake keeps things organized:
 
 ---
 
+## 💻 Platform Support
+
+| Operating System | Status |
+| :--- | :--- |
+| **Windows** | ✅ Supported |
+| **Linux** | 🏗️ In Progress |
+| **macOS** | 🏗️ In Progress |
+
+---
+
 ## 💿 Installation
 
 ### 🚀 Automatic (Recommended)
 
-**Linux / macOS**:
-```bash
-curl -fsSL https://raw.githubusercontent.com/jackby03/wovensnake/main/scripts/install.sh | sh
-```
-
 **Windows (PowerShell)**:
 ```powershell
 iwr -useb https://raw.githubusercontent.com/jackby03/wovensnake/main/scripts/install.ps1 | iex
+```
+
+**Linux / macOS** (In Progress):
+```bash
+curl -fsSL https://raw.githubusercontent.com/jackby03/wovensnake/main/scripts/install.sh | sh
 ```
 
 ### 🦀 From Source (Rustaceans)

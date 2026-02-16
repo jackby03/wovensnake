@@ -37,7 +37,7 @@ struct MetadataAsset {
 }
 
 const PYTHON_BUILD_STANDALONE_REPO: &str = "astral-sh/python-build-standalone";
-const EMBEDDED_PYTHON_METADATA: &str = include_str!("../../metadata/python_downloads.json");
+const EMBEDDED_PYTHON_METADATA: &str = include_str!("../../scripts/data/python_downloads.json");
 const PYTHON_METADATA_ENV: &str = "WOVENSNAKE_PYTHON_ASSETS_JSON";
 static METADATA_CACHE: OnceCell<Vec<MetadataAsset>> = OnceCell::new();
 

@@ -1,6 +1,5 @@
 use std::error::Error;
 use std::fs;
-use std::path::Path;
 
 use crate::cli::install;
 use crate::cli::ux;
@@ -18,14 +17,9 @@ pub async fn execute(package_name: &str) -> Result<(), Box<dyn Error>> {
         fs::write(config_path, new_json)?;
         ux::print_success(format!("Removed {package_name} from {config_path}"));
 
-        // Strategy: Delete lockfile, run install.
-        let lock_path = Path::new("wovenpkg.lock");
-        if lock_path.exists() {
-            fs::remove_file(lock_path)?;
-        }
-
+        // Use forced resolution after removal to ensure lockfile is consistent
         ux::print_info("Updating environment...");
-        install::execute().await?;
+        install::execute(true).await?;
     } else {
         ux::print_error(format!("Package {package_name} not found in dependencies."));
     }
