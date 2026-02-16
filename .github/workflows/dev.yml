@@ -2,9 +2,9 @@ name: Development CI
 
 on:
   push:
-    branches: [ "develop", "main" ]
+    branches: ["develop", "feature/*"]
   pull_request:
-    branches: [ "develop", "main" ]
+    branches: ["develop"]
 
 env:
   CARGO_TERM_COLOR: always
@@ -21,15 +21,10 @@ jobs:
   # --------------------------------------------------------------------------
   quality:
     name: Code Quality
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@master
         with:
@@ -43,32 +38,28 @@ jobs:
         run: cargo clippy -- -D warnings
 
   # --------------------------------------------------------------------------
-  # 2. TEST SUITE (Unit, Integration, System)
+  # 2. TEST SUITE (Windows-only for v0.2.x)
   # --------------------------------------------------------------------------
   test:
-    name: Test Suite (${{ matrix.os }})
+    name: Test Suite (Windows)
     needs: quality
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    
+    runs-on: windows-latest
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-      
+          python-version: "3.12"
+
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry

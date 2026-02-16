@@ -52,7 +52,7 @@ def parse_asset(asset: dict):
 
 def main():
     parser = argparse.ArgumentParser(description="Generate python asset metadata catalog from astral releases.")
-    parser.add_argument("--output", default="metadata/python_downloads.json", help="Path to write the JSON catalog")
+    parser.add_argument("--output", default="scripts/data/python_downloads.json", help="Path to write the JSON catalog")
     parser.add_argument("--pages", type=int, default=3, help="Number of release pages to scan")
     parser.add_argument("--token", help="GitHub token to raise rate limits")
     args = parser.parse_args()
