@@ -109,7 +109,7 @@ pub async fn execute(force_resolve: bool) -> Result<(), Box<dyn Error>> {
         } else {
             ux::print_header(&format!("Weaving dependency tree for {}", config.name));
         }
-        
+
         resolve_and_install_final(
             &config,
             &installed,

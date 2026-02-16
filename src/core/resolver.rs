@@ -4,8 +4,8 @@ use std::collections::{HashMap, VecDeque};
 use std::error::Error;
 use std::str::FromStr;
 
-use crate::dependencies::package;
 use crate::core::marker;
+use crate::dependencies::package;
 
 #[derive(Debug, Clone)]
 pub struct ResolutionNode {

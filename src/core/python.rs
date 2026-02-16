@@ -13,7 +13,11 @@ pub async fn validate_python_version(expected: &str) -> Result<(), Box<dyn Error
 /// Tries system PATH first, then managed versions.
 pub async fn find_python_executable(expected: &str) -> Result<String, Box<dyn Error>> {
     // Try specific version first, then 'python', then 'python3'
-    let commands = [format!("python{}", expected), "python".to_string(), "python3".to_string()];
+    let commands = [
+        format!("python{}", expected),
+        "python".to_string(),
+        "python3".to_string(),
+    ];
 
     for cmd in commands {
         if let Ok(output) = Command::new(&cmd).arg("--version").output() {

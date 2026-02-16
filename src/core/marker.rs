@@ -84,10 +84,7 @@ pub fn should_include_requirement(
     let requirement = match Requirement::<VerbatimUrl>::from_str(requirement_str) {
         Ok(req) => req,
         Err(e) => {
-            eprintln!(
-                "Warning: Failed to parse requirement '{}': {}",
-                requirement_str, e
-            );
+            eprintln!("Warning: Failed to parse requirement '{}': {}", requirement_str, e);
             return Ok(true);
         }
     };
@@ -179,11 +176,7 @@ mod tests {
     fn test_should_handle_combined_markers() {
         let env = build_marker_environment("3.12").unwrap();
         // Python 3.12 >= 3.8 should be true regardless of the AND with os_name
-        let result = should_include_requirement(
-            "package; python_version>='3.8' and os_name=='nt'",
-            &env,
-        )
-        .unwrap();
+        let result = should_include_requirement("package; python_version>='3.8' and os_name=='nt'", &env).unwrap();
         // On Windows this should be true, on other platforms false
         if cfg!(windows) {
             assert!(result);
