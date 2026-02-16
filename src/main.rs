@@ -23,7 +23,11 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// Initialize a new `WovenSnake` project
-    Init,
+    Init {
+        /// Skip interactive prompts and use defaults
+        #[arg(short, long)]
+        yes: bool,
+    },
     /// Add a new package to the project
     Add {
         /// Name of the package to add
@@ -60,8 +64,8 @@ async fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Init => {
-            if let Err(e) = cli::init::execute() {
+        Commands::Init { yes } => {
+            if let Err(e) = cli::init::execute(yes) {
                 ux::print_error(format!("Failed to initialize project: {e}"));
             }
         }
