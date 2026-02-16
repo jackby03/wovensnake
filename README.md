@@ -115,8 +115,7 @@ Building such a cozy tool takes care and patience. If WovenSnake brought you com
 
 ## 🤝 Contributing to the Nest
 
-We welcome all serpents! Whether you're fixing a bug or adding a new fang.
-Check out **[CONTRIBUTING.md](CONTRIBUTING.md)** to get started.
+We follow a **Trunk-Based Development** workflow with strict CI verification. Check out **[CONTRIBUTING.md](CONTRIBUTING.md)** to get started.
 
 ## 📜 Licenssse
 
