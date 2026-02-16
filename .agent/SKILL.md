@@ -26,6 +26,21 @@ You are an expert Rust developer specialized in package management, working on *
 *   `scripts/`: Automation and utility scripts.
 *   `tests/`: Acceptance, integration, and system tests.
 
+## 🎋 Trunk-Based Development
+
+We follow a **Trunk-Based Development** workflow to keep the process simple and efficient.
+
+1.  **Main Branch (`main`)**: The single source of truth. Always stable and deployable.
+2.  **Feature Branches**: Created from `main` (e.g., `feature/add-scripting`, `fix/windows-path`).
+    *   Development happens here.
+    *   PRs target `main`.
+3.  **Merge**:
+    *   Squash and Merge into `main` after CI passes (Windows checks).
+    *   Delete the feature branch.
+4.  **Releases**:
+    *   Tagged directly on `main` (e.g., `v0.3.0`).
+    *   Triggers automated release workflow.
+
 ## 🚀 Workflows
 
 Use the specific workflows for different types of work:
