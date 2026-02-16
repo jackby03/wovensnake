@@ -234,21 +234,52 @@ async fn resolve_and_install_final(
         let info = package::fetch_package_info(&name, None).await?;
         resolved.insert(name_lower.clone(), info.info.version.clone());
 
+        // Build marker environment for this Python version
+        let marker_env = match crate::core::marker::build_marker_environment(&config.python_version) {
+            Ok(env) => env,
+            Err(e) => {
+                ux::print_warning(format!("Failed to build marker environment: {e}. Proceeding without marker filtering."));
+                // Continue without marker filtering if environment build fails
+                if let Some(subs) = info.info.requires_dist {
+                    for sub_str in subs {
+                        let sub_name = crate::core::marker::extract_package_name(&sub_str);
+                        if !sub_name.is_empty() {
+                            queue.push_back(sub_name);
+                        }
+                    }
+                }
+                continue;
+            }
+        };
+
         if let Some(subs) = info.info.requires_dist {
             for sub_str in subs {
-                if sub_str.contains("extra ==")
-                    || (cfg!(windows) && sub_str.contains("sys_platform") && !sub_str.contains("win32"))
-                {
+                // Skip extras (e.g., "package[extra]")
+                if sub_str.contains("extra ==") {
                     continue;
                 }
-                let sub_name = sub_str
-                    .split([';', '(', '<', '>', '=', '!'])
-                    .next()
-                    .unwrap()
-                    .trim()
-                    .to_string();
-                if !sub_name.is_empty() {
-                    queue.push_back(sub_name);
+
+                // Evaluate the requirement using proper PEP 508 marker evaluation
+                match crate::core::marker::should_include_requirement(&sub_str, &marker_env) {
+                    Ok(true) => {
+                        // Requirement should be included
+                        let sub_name = crate::core::marker::extract_package_name(&sub_str);
+                        if !sub_name.is_empty() {
+                            queue.push_back(sub_name);
+                        }
+                    }
+                    Ok(false) => {
+                        // Requirement filtered out by marker
+                        continue;
+                    }
+                    Err(e) => {
+                        // If marker evaluation fails, log and include by default
+                        ux::print_warning(format!("Failed to evaluate marker for '{}': {}. Including by default.", sub_str, e));
+                        let sub_name = crate::core::marker::extract_package_name(&sub_str);
+                        if !sub_name.is_empty() {
+                            queue.push_back(sub_name);
+                        }
+                    }
                 }
             }
         }
