@@ -7,7 +7,7 @@ To ensure a smooth molting process (PR review), please follow these guidelines.
 
 1.  **Fork** the repository to your own GitHub account.
 2.  **Clone** your fork locally.
-3.  **Create a Branch** for your feature or fix:
+3.  **Create a Branch** from `main` for your feature or fix:
     *   `feature/new-fang`
     *   `fix/broken-tail`
     *   `docs/better-hiss`
