@@ -71,7 +71,7 @@ async fn main() {
             }
         }
         Commands::Install => {
-            if let Err(e) = cli::install::execute().await {
+            if let Err(e) = cli::install::execute(false).await {
                 ux::print_error(format!("Installation failed: {e}"));
             }
         }

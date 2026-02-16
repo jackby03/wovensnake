@@ -1,4 +1,5 @@
-use pep508_rs::{Requirement, VerbatimUrl, VersionOrUrl, VersionSpecifiers};
+use pep508_rs::pep440_rs::{Version, VersionSpecifiers};
+use pep508_rs::{Requirement, VerbatimUrl, VersionOrUrl};
 use std::collections::{HashMap, VecDeque};
 use std::error::Error;
 use std::str::FromStr;
@@ -38,7 +39,7 @@ pub async fn resolve(
             // Basic conflict detection: if we have a new constraint, check if existing version satisfies it
             if let Some(constraint_str) = version_constraint {
                 if let Ok(specifiers) = VersionSpecifiers::from_str(&constraint_str) {
-                    if let Ok(version) = pep440::Version::from_str(&existing.version) {
+                    if let Ok(version) = Version::from_str(&existing.version) {
                         if !specifiers.contains(&version) {
                             return Err(format!(
                                 "Conflict detected for package {}: existing version {} does not satisfy new constraint {}",

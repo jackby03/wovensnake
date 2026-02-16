@@ -1,6 +1,5 @@
 use std::error::Error;
 use std::fs;
-use std::path::Path;
 
 use crate::cli::install;
 use crate::cli::ux;
@@ -32,15 +31,8 @@ pub async fn execute(name: &str, version: Option<String>) -> Result<(), Box<dyn 
 
     ux::print_success(format!("Updated {config_path}"));
 
-    // Strategy: Delete lockfile, run install.
-    let lock_path = Path::new("wovenpkg.lock");
-    if lock_path.exists() {
-        ux::print_info("Removing old lockfile for re-resolution...");
-        fs::remove_file(lock_path)?;
-    }
-
     ux::print_info("Updating environment...");
-    install::execute().await?;
+    install::execute(true).await?;
 
     Ok(())
 }

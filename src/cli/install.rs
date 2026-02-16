@@ -15,7 +15,7 @@ use crate::core::lock::{Artifact, LockedPackage, Lockfile};
 use crate::core::selection::select_artifact;
 use crate::dependencies::package;
 
-pub async fn execute() -> Result<(), Box<dyn Error>> {
+pub async fn execute(force_resolve: bool) -> Result<(), Box<dyn Error>> {
     let config = config::read_config("wovenpkg.json")?;
 
     let lock_path = Path::new("wovenpkg.lock");
@@ -82,7 +82,7 @@ pub async fn execute() -> Result<(), Box<dyn Error>> {
 
     let multi = MultiProgress::new();
 
-    if lock_path.exists() {
+    if lock_path.exists() && !force_resolve {
         ux::print_header("Synchronizing from lockfile...");
         let lockfile = Lockfile::read(lock_path)?;
         let count = install_from_lock(
@@ -104,7 +104,12 @@ pub async fn execute() -> Result<(), Box<dyn Error>> {
             ux::print_success("All dependencies are already satisfied.");
         }
     } else {
-        ux::print_header(&format!("Weaving dependency tree for {}", config.name));
+        if force_resolve && lock_path.exists() {
+            ux::print_header(&format!("Re-weaving dependency tree for {}", config.name));
+        } else {
+            ux::print_header(&format!("Weaving dependency tree for {}", config.name));
+        }
+        
         resolve_and_install_final(
             &config,
             &installed,
@@ -208,13 +213,7 @@ async fn resolve_and_install_final(
     lock_path: &Path,
 ) -> Result<usize, Box<dyn Error>> {
     let mut lockfile = Lockfile::new(&config.name, &config.version, &config.python_version);
-    let mut resolved = HashMap::<String, String>::new();
-    let mut queue = VecDeque::<String>::new();
     let mut local_installed = installed_project.clone();
-
-    for name in config.dependencies.keys() {
-        queue.push_back(name.clone());
-    }
 
     let pb = multi.add(ProgressBar::new_spinner());
     pb.set_style(
@@ -222,73 +221,23 @@ async fn resolve_and_install_final(
             .unwrap()
             .tick_chars("⠁⠂⠄⡀⢀⠠⠐⠈"),
     );
-    pb.set_message("Weaving Giga dependency tree...");
+    pb.set_message("Solving giga-brain dependencies...");
 
-    while let Some(name) = queue.pop_front() {
-        let name_lower = name.to_lowercase().replace('-', "_");
-        if resolved.contains_key(&name_lower) {
-            continue;
-        }
+    // Use the new centralized resolver
+    let graph = crate::core::resolver::resolve(&config.dependencies, &config.python_version).await?;
+    pb.set_message("Dependency tree resolved. Satisfying packages...");
 
-        pb.set_message(format!("Resolving: {name}"));
-        let info = package::fetch_package_info(&name, None).await?;
-        resolved.insert(name_lower.clone(), info.info.version.clone());
+    let mut installed_count = 0;
 
-        // Build marker environment for this Python version
-        let marker_env = match crate::core::marker::build_marker_environment(&config.python_version) {
-            Ok(env) => env,
-            Err(e) => {
-                ux::print_warning(format!("Failed to build marker environment: {e}. Proceeding without marker filtering."));
-                // Continue without marker filtering if environment build fails
-                if let Some(subs) = info.info.requires_dist {
-                    for sub_str in subs {
-                        let sub_name = crate::core::marker::extract_package_name(&sub_str);
-                        if !sub_name.is_empty() {
-                            queue.push_back(sub_name);
-                        }
-                    }
-                }
-                continue;
-            }
-        };
+    for (name_lower, node) in graph.packages {
+        // Build the locked package entry
+        // We still need to fetch info to get URLs for the lockfile
+        // TBD: Optimization: Resolver should probably return the info objects too
+        let info = package::fetch_package_info(&node.name, Some(&node.version)).await?;
 
-        if let Some(subs) = info.info.requires_dist {
-            for sub_str in subs {
-                // Skip extras (e.g., "package[extra]")
-                if sub_str.contains("extra ==") {
-                    continue;
-                }
-
-                // Evaluate the requirement using proper PEP 508 marker evaluation
-                match crate::core::marker::should_include_requirement(&sub_str, &marker_env) {
-                    Ok(true) => {
-                        // Requirement should be included
-                        let sub_name = crate::core::marker::extract_package_name(&sub_str);
-                        if !sub_name.is_empty() {
-                            queue.push_back(sub_name);
-                        }
-                    }
-                    Ok(false) => {
-                        // Requirement filtered out by marker
-                        continue;
-                    }
-                    Err(e) => {
-                        // If marker evaluation fails, log and include by default
-                        ux::print_warning(format!("Failed to evaluate marker for '{}': {}. Including by default.", sub_str, e));
-                        let sub_name = crate::core::marker::extract_package_name(&sub_str);
-                        if !sub_name.is_empty() {
-                            queue.push_back(sub_name);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Collect ALL artifacts for the Lockfile (Multiplatform support)
         let mut artifacts: Vec<Artifact> = Vec::new();
         for url in &info.urls {
             if url.packagetype == "bdist_wheel" {
-                // Simplistic platform detection from filename
                 let platform = if url.filename.contains("win_amd64") {
                     "win_amd64".to_string()
                 } else if url.filename.contains("manylinux") {
@@ -316,11 +265,11 @@ async fn resolve_and_install_final(
         }
 
         lockfile.packages.insert(
-            info.info.name.clone(),
+            node.name.clone(),
             LockedPackage {
-                version: info.info.version.clone(),
+                version: node.version.clone(),
                 artifacts: artifacts.clone(),
-                dependencies: vec![],
+                dependencies: node.dependencies.clone(),
             },
         );
 
@@ -330,6 +279,7 @@ async fn resolve_and_install_final(
             if local_installed.insert(name_lower) {
                 let dest_path = packages_dir.join(&pkg_url.filename);
                 if !cache.contains(&pkg_url.filename, &pkg_url.sha256) && !dest_path.exists() {
+                    pb.set_message(format!("Downloading: {}", node.name));
                     package::download_package(&pkg_url.url, &dest_path).await?;
                     let data = std::fs::read(&dest_path)?;
                     let _ = cache.save(&pkg_url.filename, &pkg_url.sha256, &data);
@@ -337,18 +287,20 @@ async fn resolve_and_install_final(
                     let _ = cache.link_to_project(&pkg_url.filename, &pkg_url.sha256, packages_dir);
                 }
 
+                pb.set_message(format!("Installing: {}", node.name));
                 if pkg_url.filename.to_lowercase().ends_with(".whl") {
                     let _ = package::extract_wheel(&dest_path, site_packages);
                 } else {
                     let _ = package::extract_targz(&dest_path, site_packages);
                 }
+                installed_count += 1;
             }
         }
     }
 
     lockfile.write(lock_path)?;
-    pb.finish_with_message("\x1b[32m✓\x1b[0m Tree woven.");
-    Ok(resolved.len())
+    pb.finish_with_message("\x1b[32m✓\x1b[0m Tree woven and environment satisfied.");
+    Ok(installed_count)
 }
 
 fn prune_unused_packages(site_packages: &Path, lockfile: &Lockfile, multi: &MultiProgress) {
