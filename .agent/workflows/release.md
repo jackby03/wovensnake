@@ -33,4 +33,6 @@ Follow these steps to prepare and trigger a new release:
         git push origin vX.Y.Z
         ```
 7.  **Deployment**: The GitHub Action `release.yml` will automatically build the binaries and publish to Crates.io upon detection of the new tag.
-8.  **Post-Release**: Verify the GitHub Release page and the Crates.io listing.
+8.  **Post-Release Cleanup & Sync**: 
+    *   Verify the GitHub Release page and Crates.io.
+    *   Ensure local `main` is perfectly in sync with the tagged commit.

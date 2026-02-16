@@ -32,5 +32,14 @@ Follow these steps when implementing a new feature for WovenSnake:
         cargo clippy -- -D warnings
         cargo fmt -- --check
         ```
-6.  **Committing**: Use conventional commits (e.g., `feat: provide better errors`).
-7.  **PR Preparation**: Document your changes and link any relevant issues.
+6.  **PR Submission**:
+    *   Commit changes using conventional commits.
+    *   Create a PR targeting `main`.
+7.  **Phase 3: Verification & Merge (Mandatory)**:
+    *   **Wait for CI**: Explicitly check CI status using `mcp_MCP_DOCKER_get_commit` or `mcp_MCP_DOCKER_pull_request_read`.
+    *   **NEVER merge if CI is red or pending.**
+    *   **Merge**: Squash and Merge into `main`.
+    *   **Cleanup**:
+        *   Delete remote branch: `git push origin --delete <branch>`
+        *   Switch to main and pull: `git checkout main && git pull origin main`
+        *   Delete local branch: `git branch -D <branch>`

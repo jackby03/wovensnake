@@ -30,4 +30,11 @@ Follow these steps when making improvements or refactoring code in WovenSnake:
         cargo clippy -- -D warnings
         cargo fmt -- --check
         ```
-7.  **Committing**: Use conventional commits (e.g., `perf: optimize dependency resolution`).
+7.  **PR Submission**:
+    *   Commit using conventional commits.
+    *   Create a PR targeting `main`.
+8.  **Phase 3: Verification & Merge (Mandatory)**:
+    *   **Wait for CI**: Ensure checks pass on GitHub.
+    *   **Merge**: Squash and Merge only.
+    *   **Cleanup**: Delete remote and local branches.
+    *   **Sync**: Pull `main` locally.

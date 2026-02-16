@@ -26,20 +26,32 @@ You are an expert Rust developer specialized in package management, working on *
 *   `scripts/`: Automation and utility scripts.
 *   `tests/`: Acceptance, integration, and system tests.
 
-## 🎋 Trunk-Based Development
+## 🎋 Trunk-Based Development & Git Policy
 
-We follow a **Trunk-Based Development** workflow to keep the process simple and efficient.
+We follow a strict **Trunk-Based Development** workflow. Main branch stability is paramount.
 
-1.  **Main Branch (`main`)**: The single source of truth. Always stable and deployable.
-2.  **Feature Branches**: Created from `main` (e.g., `feature/add-scripting`, `fix/windows-path`).
-    *   Development happens here.
-    *   PRs target `main`.
-3.  **Merge**:
-    *   Squash and Merge into `main` after CI passes (Windows checks).
-    *   Delete the feature branch.
-4.  **Releases**:
-    *   Tagged directly on `main` (e.g., `v0.3.0`).
-    *   Triggers automated release workflow.
+### Branching & PRs
+1.  **Main Branch (`main`)**: The single source of truth. Always stable.
+2.  **Feature Branches**: Created from `main` (e.g., `feature/xyz`).
+3.  **Pull Requests**: Every change MUST go through a PR targeting `main`.
+
+### 🛡️ Strict Merge Protocol (Mandatory)
+Before merging any PR, the agent MUST:
+1.  **Verify CI**: Call `mcp_MCP_DOCKER_get_commit` or `mcp_MCP_DOCKER_pull_request_read` (method: `get_status`) to ensure all checks are `success`. 
+2.  **NEVER merge on red or pending CI status.**
+3.  **Merge Method**: Use **Squash and Merge** ONLY (`mcp_MCP_DOCKER_merge_pull_request` with `merge_method: squash`).
+
+### 🧹 Post-Merge Cleanup (Mandatory)
+Immediately after a successful merge:
+1.  **Delete Remote Branch**: `git push origin --delete <branch>`
+2.  **Switch & Pull**: `git checkout main` and `git pull origin main`.
+3.  **Delete Local Branch**: `git branch -D <branch>`.
+
+### 🚨 Fail-Safe & Fixes
+If CI fails on a feature branch:
+1.  Apply fixes directly to the feature branch.
+2.  Push and wait for CI to re-run.
+3.  Do NOT touch `main` or attempt to fix CI issues directly on `main` unless the issue is inherited from `main`.
 
 ## 🚀 Workflows
 

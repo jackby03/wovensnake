@@ -16,7 +16,7 @@ We take the security of WovenSnake seriously. If you believe you have found a se
 **Please do not open a public GitHub issue for security vulnerabilities.**
 
 Instead, please send an email to:
-**jackdelaguilavilla03@gmail.com**
+**jackby03@protonmail.com**
 
 ### What to include in your report
 

@@ -21,6 +21,11 @@ Use this workflow when you encounter bugs, failing tests, or unexpected behavior
     *   Inspect `wovenpkg.json` and `wovenpkg.lock` for inconsistencies.
     *   Check the `reports/playground_report.html` if the validation script failed.
 7.  **Fix and Validate**:
-    *   Apply the fix.
-    *   Run the unit/integration tests.
-    *   **Crucial**: Run `./scripts/validate_playground.ps1` to ensure no side effects.
+    *   Apply the fix on a `fix/` or `hotfix/` branch.
+    *   Run tests and `./scripts/validate_playground.ps1`.
+    *   Create a PR targeting `main`.
+8.  **Phase 3: Verification & Merge (Mandatory)**:
+    *   **Wait for CI**: Ensure checks pass on GitHub.
+    *   **Merge**: Squash and Merge only.
+    *   **Cleanup**: Delete remote and local branches.
+    *   **Sync**: Pull `main` locally.
