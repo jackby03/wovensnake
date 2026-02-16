@@ -19,6 +19,7 @@ pub struct DependencyGraph {
 }
 
 /// Resolves dependencies for the project.
+#[allow(clippy::implicit_hasher)]
 pub async fn resolve(
     root_deps: &HashMap<String, String>,
     python_version: &str,
@@ -62,7 +63,7 @@ pub async fn resolve(
         if let Some(requires_dist) = info.info.requires_dist {
             for req_str in requires_dist {
                 // Filter by markers
-                if marker::should_include_requirement(&req_str, &marker_env)? {
+                if marker::should_include_requirement(&req_str, &marker_env) {
                     let req = Requirement::<VerbatimUrl>::from_str(&req_str)?;
                     let sub_name = req.name.to_string();
                     let sub_constraint = match req.version_or_url {

@@ -80,18 +80,18 @@ pub fn build_marker_environment(python_version: &str) -> Result<MarkerEnvironmen
 pub fn should_include_requirement(
     requirement_str: &str,
     marker_env: &MarkerEnvironment,
-) -> Result<bool, Box<dyn Error>> {
+) -> bool {
     let requirement = match Requirement::<VerbatimUrl>::from_str(requirement_str) {
         Ok(req) => req,
         Err(e) => {
             eprintln!("Warning: Failed to parse requirement '{}': {}", requirement_str, e);
-            return Ok(true);
+            return true;
         }
     };
 
     // evaluate_markers returns true if the requirement should be installed
     // (either no markers, or markers match the environment)
-    Ok(requirement.evaluate_markers(marker_env, &[]))
+    requirement.evaluate_markers(marker_env, &[])
 }
 
 /// Extract the package name from a PEP 508 requirement string.
@@ -143,40 +143,40 @@ mod tests {
     #[test]
     fn test_should_include_no_marker() {
         let env = build_marker_environment("3.12").unwrap();
-        assert!(should_include_requirement("requests>=2.0.0", &env).unwrap());
+        assert!(should_include_requirement("requests>=2.0.0", &env));
     }
 
     #[test]
     #[cfg(windows)]
     fn test_should_include_win32_on_windows() {
         let env = build_marker_environment("3.12").unwrap();
-        assert!(should_include_requirement("pywin32; sys_platform=='win32'", &env).unwrap());
+        assert!(should_include_requirement("pywin32; sys_platform=='win32'", &env));
     }
 
     #[test]
     #[cfg(windows)]
     fn test_should_exclude_linux_on_windows() {
         let env = build_marker_environment("3.12").unwrap();
-        assert!(!should_include_requirement("uvloop; sys_platform=='linux'", &env).unwrap());
+        assert!(!should_include_requirement("uvloop; sys_platform=='linux'", &env));
     }
 
     #[test]
     fn test_should_include_python_version_match() {
         let env = build_marker_environment("3.12").unwrap();
-        assert!(should_include_requirement("package; python_version>='3.8'", &env).unwrap());
+        assert!(should_include_requirement("package; python_version>='3.8'", &env));
     }
 
     #[test]
     fn test_should_exclude_old_python_version() {
         let env = build_marker_environment("3.12").unwrap();
-        assert!(!should_include_requirement("package; python_version<'3.10'", &env).unwrap());
+        assert!(!should_include_requirement("package; python_version<'3.10'", &env));
     }
 
     #[test]
     fn test_should_handle_combined_markers() {
         let env = build_marker_environment("3.12").unwrap();
         // Python 3.12 >= 3.8 should be true regardless of the AND with os_name
-        let result = should_include_requirement("package; python_version>='3.8' and os_name=='nt'", &env).unwrap();
+        let result = should_include_requirement("package; python_version>='3.8' and os_name=='nt'", &env);
         // On Windows this should be true, on other platforms false
         if cfg!(windows) {
             assert!(result);

@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::HashSet;
 use std::error::Error;
 use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
