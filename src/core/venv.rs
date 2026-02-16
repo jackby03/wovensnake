@@ -49,7 +49,12 @@ pub fn get_venv_python_version(path: &Path) -> Result<String, Box<dyn Error>> {
     let python_exe = if cfg!(windows) {
         path.join("Scripts").join("python.exe")
     } else {
-        path.join("bin").join("python")
+        let p = path.join("bin").join("python");
+        if p.exists() {
+            p
+        } else {
+            path.join("bin").join("python3")
+        }
     };
 
     if !python_exe.exists() {

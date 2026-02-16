@@ -163,10 +163,20 @@ python \"%~dp0\\{name}-script.py\" %*"
                         let sh_content = format!(
                             "#!/bin/sh
 export PYTHONPATH=\"$(dirname \"$0\")/../lib/python{python_version}/site-packages:$PYTHONPATH\"
-python3 \"$(dirname \"$0\")/{name}-script.py\" \"$@\""
+\"$(dirname \"$0\")/python\" \"$(dirname \"$0\")/{name}-script.py\" \"$@\""
                         );
                         let sh_path = scripts_dir.join(name);
                         fs::write(&sh_path, sh_content)?;
+
+                        #[cfg(unix)]
+                        {
+                            use std::os::unix::fs::PermissionsExt;
+                            if let Ok(metadata) = fs::metadata(&sh_path) {
+                                let mut perms = metadata.permissions();
+                                perms.set_mode(0o755);
+                                let _ = fs::set_permissions(&sh_path, perms);
+                            }
+                        }
                     }
                 }
             }

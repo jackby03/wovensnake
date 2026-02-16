@@ -1,7 +1,9 @@
 pub mod cache;
 pub mod config;
 pub mod lock;
+pub mod marker;
 pub mod python;
 pub mod python_manager;
+pub mod resolver;
 pub mod selection;
 pub mod venv;
