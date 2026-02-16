@@ -77,10 +77,7 @@ pub fn build_marker_environment(python_version: &str) -> Result<MarkerEnvironmen
 ///
 /// Returns `true` if the requirement should be installed, `false` if its
 /// markers exclude it from the current environment.
-pub fn should_include_requirement(
-    requirement_str: &str,
-    marker_env: &MarkerEnvironment,
-) -> bool {
+pub fn should_include_requirement(requirement_str: &str, marker_env: &MarkerEnvironment) -> bool {
     let requirement = match Requirement::<VerbatimUrl>::from_str(requirement_str) {
         Ok(req) => req,
         Err(e) => {
