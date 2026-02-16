@@ -29,8 +29,6 @@ jobs:
   quality:
     name: Code Quality
     runs-on: windows-latest
-    env:
-      RUST_TOOLCHAIN: ${{ inputs.toolchain || 'stable' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -53,8 +51,6 @@ jobs:
     name: Test Suite (Windows)
     needs: quality
     runs-on: windows-latest
-    env:
-      RUST_TOOLCHAIN: ${{ inputs.toolchain || 'stable' }}
     steps:
       - uses: actions/checkout@v4
 
