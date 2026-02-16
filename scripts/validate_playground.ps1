@@ -107,7 +107,7 @@ function Add-Result {
 }
 
 # 2. Init (Auto-detection)
-$ResInit = Run-Step "Initialize Project (Auto-detect Python)" $BinaryPath @("init")
+$ResInit = Run-Step "Initialize Project (Auto-detect Python)" $BinaryPath @("init", "--yes")
 
 # Check if file exists before reading
 if (-not (Test-Path "wovenpkg.json")) {
