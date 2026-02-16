@@ -65,6 +65,9 @@ async fn main() {
 
     match cli.command {
         Commands::Init { yes } => {
+            if !yes {
+                ux::print_welcome();
+            }
             if let Err(e) = cli::init::execute(yes) {
                 ux::print_error(format!("Failed to initialize project: {e}"));
             }
