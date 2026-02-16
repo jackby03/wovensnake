@@ -1,0 +1,5 @@
+# Enforce Unix line endings for Rust files
+*.rs text eol=lf
+
+# Default for other files
+* text=auto
