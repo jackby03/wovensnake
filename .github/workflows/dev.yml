@@ -5,6 +5,13 @@ on:
     branches: ["main", "feature/*"]
   pull_request:
     branches: ["main"]
+  workflow_call:
+    inputs:
+      toolchain:
+        description: "Rust toolchain to use"
+        required: false
+        default: "stable"
+        type: string
 
 env:
   CARGO_TERM_COLOR: always
@@ -28,7 +35,7 @@ jobs:
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@v1
         with:
-          toolchain: stable
+          toolchain: ${{ inputs.toolchain || 'stable' }}
           components: rustfmt, clippy
 
       - name: Check Formatting
@@ -56,7 +63,7 @@ jobs:
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@v1
         with:
-          toolchain: stable
+          toolchain: ${{ inputs.toolchain || 'stable' }}
 
       - name: Cache dependencies
         uses: actions/cache@v4
