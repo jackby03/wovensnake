@@ -24,7 +24,7 @@ pub fn print_header(msg: &str) {
 }
 
 pub fn print_welcome() {
-    use console::{style, Emoji};
+    use console::{style, Emoji, Style};
     
     println!("{}", style(r"
    /$$      /$$                                         /$$$$$$                      /$$              
@@ -42,5 +42,5 @@ pub fn print_welcome() {
         style("WovenSnake Package Manager").cyan().bold(),
         style(format!("v{}", env!("CARGO_PKG_VERSION"))).dim()
     );
-    println!("                {}\n", style("Dependencies, neatly woven.").italic().dim());
+    println!("                {}\n", Style::new().italic().dim().apply_to("Dependencies, neatly woven."));
 }
