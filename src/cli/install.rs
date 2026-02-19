@@ -15,6 +15,44 @@ use crate::core::lock::{Artifact, LockedPackage, Lockfile};
 use crate::core::selection::select_artifact;
 use crate::dependencies::package;
 
+fn current_platform() -> &'static str {
+    if cfg!(windows) {
+        "win_amd64"
+    } else if cfg!(target_os = "macos") {
+        if cfg!(target_arch = "aarch64") {
+            "macosx_arm64"
+        } else {
+            "macosx_x86_64"
+        }
+    } else if cfg!(target_arch = "aarch64") {
+        "manylinux_aarch64"
+    } else {
+        "manylinux"
+    }
+}
+
+fn platform_from_filename(filename: &str) -> String {
+    if filename.contains("win_amd64") || filename.contains("win32") {
+        "win_amd64".to_string()
+    } else if filename.contains("macosx") {
+        if filename.contains("arm64") || filename.contains("aarch64") {
+            "macosx_arm64".to_string()
+        } else {
+            "macosx_x86_64".to_string()
+        }
+    } else if filename.contains("manylinux") {
+        if filename.contains("aarch64") {
+            "manylinux_aarch64".to_string()
+        } else {
+            "manylinux".to_string()
+        }
+    } else if filename.contains("none-any") || filename.contains("py3-none") || filename.contains("py2.py3") {
+        "any".to_string()
+    } else {
+        "other".to_string()
+    }
+}
+
 pub async fn execute(force_resolve: bool) -> Result<(), Box<dyn Error>> {
     let config = config::read_config("wovenpkg.json")?;
 
@@ -170,7 +208,7 @@ async fn install_from_lock(
                 pb.set_message(format!("Syncing: {name}"));
 
                 if let Some(artifact) =
-                    select_artifact(&pkg.artifacts, if cfg!(windows) { "win_amd64" } else { "manylinux" })
+                    select_artifact(&pkg.artifacts, current_platform())
                 {
                     let dest_path = packages_dir.join(&artifact.filename);
                     if cache.contains(&artifact.filename, &artifact.sha256) {
@@ -238,15 +276,7 @@ async fn resolve_and_install_final(
         let mut artifacts: Vec<Artifact> = Vec::new();
         for url in &info.urls {
             if url.packagetype == "bdist_wheel" {
-                let platform = if url.filename.contains("win_amd64") {
-                    "win_amd64".to_string()
-                } else if url.filename.contains("manylinux") {
-                    "manylinux".to_string()
-                } else if url.filename.contains("any") {
-                    "any".to_string()
-                } else {
-                    "other".to_string()
-                };
+                let platform = platform_from_filename(&url.filename);
 
                 artifacts.push(Artifact {
                     url: url.url.clone(),
@@ -274,8 +304,7 @@ async fn resolve_and_install_final(
         );
 
         // Resolve local installation
-        let current_platform = if cfg!(windows) { "win_amd64" } else { "manylinux" }; // simplified
-        if let Some(pkg_url) = select_artifact(&artifacts, current_platform) {
+        if let Some(pkg_url) = select_artifact(&artifacts, current_platform()) {
             if local_installed.insert(name_lower) {
                 let dest_path = packages_dir.join(&pkg_url.filename);
                 if !cache.contains(&pkg_url.filename, &pkg_url.sha256) && !dest_path.exists() {
@@ -340,4 +369,67 @@ fn prune_unused_packages(site_packages: &Path, lockfile: &Lockfile, multi: &Mult
         }
     }
     pb.finish_and_clear();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_platform_from_filename_windows() {
+        assert_eq!(platform_from_filename("numpy-1.24.0-cp311-cp311-win_amd64.whl"), "win_amd64");
+        assert_eq!(platform_from_filename("numpy-1.24.0-cp311-cp311-win32.whl"), "win_amd64");
+    }
+
+    #[test]
+    fn test_platform_from_filename_macos() {
+        assert_eq!(
+            platform_from_filename("numpy-1.24.0-cp311-cp311-macosx_11_0_arm64.whl"),
+            "macosx_arm64"
+        );
+        assert_eq!(
+            platform_from_filename("numpy-1.24.0-cp311-cp311-macosx_10_9_x86_64.whl"),
+            "macosx_x86_64"
+        );
+        assert_eq!(
+            platform_from_filename("some-pkg-macosx_12_0_aarch64.whl"),
+            "macosx_arm64"
+        );
+    }
+
+    #[test]
+    fn test_platform_from_filename_linux() {
+        assert_eq!(
+            platform_from_filename("numpy-1.24.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"),
+            "manylinux"
+        );
+        assert_eq!(
+            platform_from_filename("numpy-1.24.0-cp311-cp311-manylinux_2_17_aarch64.whl"),
+            "manylinux_aarch64"
+        );
+    }
+
+    #[test]
+    fn test_platform_from_filename_universal() {
+        assert_eq!(
+            platform_from_filename("requests-2.28.0-py3-none-any.whl"),
+            "any"
+        );
+        assert_eq!(
+            platform_from_filename("six-1.16.0-py2.py3-none-any.whl"),
+            "any"
+        );
+    }
+
+    #[test]
+    fn test_platform_from_filename_other() {
+        assert_eq!(platform_from_filename("unknown-1.0-cp311-cp311-unknown.whl"), "other");
+    }
+
+    #[test]
+    fn test_current_platform_is_valid() {
+        let platform = current_platform();
+        let valid = ["win_amd64", "macosx_arm64", "macosx_x86_64", "manylinux", "manylinux_aarch64"];
+        assert!(valid.contains(&platform), "unexpected platform: {platform}");
+    }
 }

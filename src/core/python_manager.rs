@@ -219,14 +219,25 @@ fn apply_post_install_patches(dest: &Path, version: &str) -> Result<(), Box<dyn 
     }
 
     // 2. Ensure canonical executables (symlinks/copies)
-    // If we only have python.exe, ensure we have python3.exe etc.
     if cfg!(windows) {
+        // On Windows: ensure python3.x.exe exists alongside python.exe
         let python_exe = install_dir.join("python.exe");
         if python_exe.exists() {
             let major_minor = version.split('.').take(2).collect::<Vec<_>>().join(".");
             let python_ver_exe = install_dir.join(format!("python{}.exe", major_minor));
             if !python_ver_exe.exists() {
                 fs::copy(&python_exe, &python_ver_exe)?;
+            }
+        }
+    } else {
+        // On Unix: ensure 'python' symlink exists alongside 'python3'
+        let bin_dir = install_dir.join("bin");
+        let python3 = bin_dir.join("python3");
+        let python = bin_dir.join("python");
+        if python3.exists() && !python.exists() {
+            #[cfg(unix)]
+            {
+                let _ = std::os::unix::fs::symlink(&python3, &python);
             }
         }
     }
