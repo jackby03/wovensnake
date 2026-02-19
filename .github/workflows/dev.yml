@@ -1,17 +1,7 @@
 name: Development CI
 
 on:
-  push:
-    branches: ["main", "feature/*"]
-  pull_request:
-    branches: ["main"]
-  workflow_call:
-    inputs:
-      toolchain:
-        description: "Rust toolchain to use"
-        required: false
-        default: "stable"
-        type: string
+  workflow_dispatch: # disabled: triggers removed (security scanning now handled by GitHub Advanced Security)
 
 env:
   CARGO_TERM_COLOR: always
