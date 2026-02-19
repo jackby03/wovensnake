@@ -99,6 +99,15 @@ pub fn extract_wheel(wheel_path: &Path, dest_path: &Path) -> Result<(), Box<dyn 
             }
             let mut outfile = fs::File::create(&outpath)?;
             io::copy(&mut file, &mut outfile)?;
+
+            // Preserve Unix permissions stored in the wheel (zip) file
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                if let Some(mode) = file.unix_mode() {
+                    let _ = fs::set_permissions(&outpath, fs::Permissions::from_mode(mode));
+                }
+            }
         }
     }
 
