@@ -53,9 +53,19 @@ pub async fn resolve(
             continue;
         }
 
-        // Fetch package info
-        // We prioritize the version constraint if provided
-        let info = package::fetch_package_info(&name, version_constraint.as_deref()).await?;
+        // Fetch package info.
+        // PyPI versioned API (/{name}/{version}/json) only accepts exact versions.
+        // Range specifiers like ">=2,<4" or "~=3.1" must be fetched as latest (/json),
+        // then the constraint is enforced by the caller.
+        let fetch_version = version_constraint.as_deref().and_then(|v| {
+            let trimmed = v.trim_start_matches("==");
+            if trimmed.chars().next().map_or(false, |c| c.is_ascii_digit()) {
+                Some(trimmed)
+            } else {
+                None // range specifier → fetch latest
+            }
+        });
+        let info = package::fetch_package_info(&name, fetch_version).await?;
         let resolved_version = info.info.version.clone();
 
         let mut sub_deps = Vec::new();
