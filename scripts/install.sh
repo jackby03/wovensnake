@@ -1,86 +1,195 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ─── Colors ────────────────────────────────────────────────────────────────────
+if [ -t 1 ]; then
+    BOLD='\033[1m'; DIM='\033[2m'; RESET='\033[0m'
+    CYAN='\033[36m'; GREEN='\033[32m'; RED='\033[31m'; YELLOW='\033[33m'; BLUE='\033[34m'; GRAY='\033[90m'
+else
+    BOLD=''; DIM=''; RESET=''; CYAN=''; GREEN=''; RED=''; YELLOW=''; BLUE=''; GRAY=''
+fi
 
 REPO="jackby03/wovensnake"
-INSTALL_DIR="$HOME/.wovensnake/bin"
+DEFAULT_INSTALL_DIR="$HOME/.wovensnake/bin"
 EXE_NAME="woven"
+INSTALL_DIR="$DEFAULT_INSTALL_DIR"
+YES=false
+NO_PATH=false
 
-echo "🧶 WovenSnake Installer"
-echo "-----------------------"
+# ─── Args ───────────────────────────────────────────────────────────────────────
+for arg in "$@"; do
+    case "$arg" in
+        -y|--yes)            YES=true ;;
+        --no-modify-path)    NO_PATH=true ;;
+        --install-dir=*)     INSTALL_DIR="${arg#*=}" ;;
+        -h|--help)
+            echo "Usage: install.sh [options]"
+            echo "  -y, --yes              Non-interactive (accept all defaults)"
+            echo "  --no-modify-path       Don't modify shell config"
+            echo "  --install-dir=PATH     Custom install directory"
+            exit 0 ;;
+    esac
+done
 
-# 1. Detect OS and architecture
+# ─── Helpers ───────────────────────────────────────────────────────────────────
+info()    { printf "  ${CYAN}•${RESET} %s\n" "$*"; }
+success() { printf "  ${GREEN}✓${RESET} %s\n" "$*"; }
+warn()    { printf "  ${YELLOW}!${RESET} %s\n" "$*"; }
+fail()    { printf "  ${RED}✗${RESET} %s\n" "$*" >&2; exit 1; }
+step()    { printf "\n${BOLD}${CYAN}[%s]${RESET} %s\n" "$1" "$2"; }
+
+confirm() {
+    local prompt="$1" default="${2:-y}"
+    if $YES; then return 0; fi
+    local hint
+    [ "$default" = "y" ] && hint="${GREEN}Y${RESET}/n" || hint="y/${GREEN}N${RESET}"
+    printf "  ${BOLD}?${RESET} %s [%b] " "$prompt" "$hint"
+    read -r answer </dev/tty
+    answer="${answer:-$default}"
+    [[ "$answer" =~ ^[Yy]$ ]]
+}
+
+spinner() {
+    local pid=$1 msg="$2"
+    local frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    local i=0
+    while kill -0 "$pid" 2>/dev/null; do
+        local frame="${frames:$((i % ${#frames})):1}"
+        printf "\r  ${CYAN}%s${RESET} %s..." "$frame" "$msg"
+        sleep 0.1
+        i=$((i + 1))
+    done
+    printf "\r"
+}
+
+# ─── Banner ────────────────────────────────────────────────────────────────────
+printf "\n"
+printf "${BOLD}${CYAN}"
+printf "   ╦ ╦╔═╗╦  ╦╔═╗╔╗╔╔═╗╔╗╔╔═╗╦╔═╔═╗\n"
+printf "   ║║║║ ║╚╗╔╝║╣ ║║║╚═╗║║║╠═╣╠╩╗║╣ \n"
+printf "   ╚╩╝╚═╝ ╚╝ ╚═╝╝╚╝╚═╝╝╚╝╩ ╩╩ ╩╚═╝\n"
+printf "${RESET}"
+printf "   ${DIM}Dependencies, neatly woven.${RESET}\n"
+printf "   ${GRAY}────────────────────────────────${RESET}\n\n"
+
+# ─── 1. Detect Platform ────────────────────────────────────────────────────────
+step "1/5" "Detecting your system"
+
 OS="$(uname -s)"
 ARCH="$(uname -m)"
 
 case "$OS" in
     Linux*)
+        OS_NAME="Linux"
         case "$ARCH" in
-            x86_64)  ASSET="woven-linux-amd64";;
-            aarch64) ASSET="woven-linux-aarch64";;
-            *)       echo "Unsupported architecture: $ARCH"; exit 1;;
-        esac
-        ;;
+            x86_64)  ASSET="woven-linux-amd64";  ARCH_NAME="x86_64" ;;
+            aarch64) ASSET="woven-linux-aarch64"; ARCH_NAME="arm64" ;;
+            *)       fail "Unsupported architecture: $ARCH" ;;
+        esac ;;
     Darwin*)
+        OS_NAME="macOS"
         case "$ARCH" in
-            arm64)   ASSET="woven-macos-arm64";;
-            x86_64)  ASSET="woven-macos-amd64";;
-            *)       echo "Unsupported architecture: $ARCH"; exit 1;;
-        esac
-        ;;
+            arm64)   ASSET="woven-macos-arm64";  ARCH_NAME="Apple Silicon (arm64)" ;;
+            x86_64)  ASSET="woven-macos-amd64";  ARCH_NAME="Intel (x86_64)" ;;
+            *)       fail "Unsupported architecture: $ARCH" ;;
+        esac ;;
     *)
-        echo "Unsupported OS: $OS"; exit 1;;
+        fail "Unsupported OS: $OS. Only Linux and macOS are supported." ;;
 esac
+
+info "OS:   ${BOLD}$OS_NAME${RESET}"
+info "Arch: ${BOLD}$ARCH_NAME${RESET}"
+info "Dir:  ${BOLD}$INSTALL_DIR${RESET}"
+
+# ─── 2. Confirm ────────────────────────────────────────────────────────────────
+step "2/5" "Confirm installation"
+
+if ! confirm "Install woven to $INSTALL_DIR?"; then
+    printf "\n  ${GRAY}Installation cancelled.${RESET}\n\n"
+    exit 0
+fi
+
+# ─── 3. Resolve Asset URL ──────────────────────────────────────────────────────
+step "3/5" "Resolving download"
 
 BASE_URL="https://github.com/$REPO/releases/latest/download"
 URL="$BASE_URL/$ASSET"
 
-# On macOS arm64: check if native arm64 binary exists (follows redirects); fall back to amd64 (Rosetta 2)
+# On macOS arm64: check if native binary exists, fall back to amd64 (Rosetta 2)
 if [ "$ARCH" = "arm64" ] && [ "$OS" = "Darwin" ]; then
-    HTTP_CODE=""
-    if command -v curl >/dev/null 2>&1; then
-        HTTP_CODE="$(curl -o /dev/null -s -w "%{http_code}" -L "$URL")"
-    fi
+    HTTP_CODE="$(curl -o /dev/null -s -w "%{http_code}" -L "$URL" 2>/dev/null || echo "000")"
     if [ "$HTTP_CODE" != "200" ]; then
-        echo "Note: No native arm64 binary found (HTTP $HTTP_CODE), using amd64 via Rosetta 2."
+        warn "Native arm64 binary not available yet (HTTP $HTTP_CODE)"
+        warn "Falling back to amd64 — will run via Rosetta 2"
         ASSET="woven-macos-amd64"
         URL="$BASE_URL/$ASSET"
+    else
+        success "Native arm64 binary found"
     fi
 fi
 
-# 2. Prepare Directory
+info "Asset: ${BOLD}$ASSET${RESET}"
+
+# ─── 4. Download & Install ─────────────────────────────────────────────────────
+step "4/5" "Downloading & installing"
+
 mkdir -p "$INSTALL_DIR"
+TMP_FILE="$(mktemp)"
+trap 'rm -f "$TMP_FILE"' EXIT
 
-# 3. Download
-echo "Downloading $ASSET..."
 if command -v curl >/dev/null 2>&1; then
-    curl -fsSL "$URL" -o "$INSTALL_DIR/$EXE_NAME"
+    curl -fsSL "$URL" -o "$TMP_FILE" &
+    CURL_PID=$!
+    spinner "$CURL_PID" "Downloading $ASSET"
+    wait "$CURL_PID" || fail "Download failed. Check your connection or try again."
 elif command -v wget >/dev/null 2>&1; then
-    wget -q "$URL" -O "$INSTALL_DIR/$EXE_NAME"
+    wget -q "$URL" -O "$TMP_FILE" || fail "Download failed. Check your connection or try again."
 else
-    echo "Error: Neither curl nor wget found."
-    exit 1
+    fail "Neither curl nor wget found. Please install one and retry."
 fi
 
+mv "$TMP_FILE" "$INSTALL_DIR/$EXE_NAME"
 chmod +x "$INSTALL_DIR/$EXE_NAME"
-echo "Installed to $INSTALL_DIR/$EXE_NAME"
+success "Binary installed to ${BOLD}$INSTALL_DIR/$EXE_NAME${RESET}"
 
-# 4. Update Shell Config
-case "$SHELL" in
-    */zsh) CONFIG="$HOME/.zshrc";;
-    */bash) CONFIG="$HOME/.bashrc";;
-    *) CONFIG="$HOME/.profile";;
-esac
-
-if ! grep -q "$INSTALL_DIR" "$CONFIG"; then
-    echo "Adding to PATH in $CONFIG..."
-    echo "" >> "$CONFIG"
-    echo "# WovenSnake" >> "$CONFIG"
-    echo "export PATH=\"\$PATH:$INSTALL_DIR\"" >> "$CONFIG"
-    echo "Path updated. Please run: source $CONFIG"
+# Verify binary runs
+if "$INSTALL_DIR/$EXE_NAME" --help >/dev/null 2>&1; then
+    success "Binary verified and working"
 else
-    echo "Already in PATH."
+    warn "Could not verify binary (it may still work — try running 'woven --help')"
 fi
 
-echo ""
-echo "✨ WovenSnake successfully installed!"
-echo "Run 'woven --help' to start."
+# ─── 5. Setup PATH ─────────────────────────────────────────────────────────────
+step "5/5" "Setting up PATH"
+
+if $NO_PATH; then
+    info "Skipping PATH modification (--no-modify-path)"
+else
+    case "${SHELL:-}" in
+        */zsh)  CONFIG="$HOME/.zshrc" ;;
+        */bash) CONFIG="$HOME/.bashrc" ;;
+        *)      CONFIG="$HOME/.profile" ;;
+    esac
+
+    if grep -q "$INSTALL_DIR" "$CONFIG" 2>/dev/null; then
+        success "Already in PATH ($CONFIG)"
+    else
+        if confirm "Add woven to PATH in $CONFIG?"; then
+            printf '\n# WovenSnake\nexport PATH="$PATH:%s"\n' "$INSTALL_DIR" >> "$CONFIG"
+            success "PATH updated in ${BOLD}$CONFIG${RESET}"
+            info "Run ${BOLD}source $CONFIG${RESET} or open a new terminal to activate"
+        else
+            warn "Skipped PATH update — add manually:"
+            printf "      ${GRAY}export PATH=\"\$PATH:%s\"${RESET}\n" "$INSTALL_DIR"
+        fi
+    fi
+fi
+
+# ─── Done ──────────────────────────────────────────────────────────────────────
+printf "\n${BOLD}${GREEN}  ✨ WovenSnake installed successfully!${RESET}\n\n"
+printf "  ${GRAY}Get started:${RESET}\n"
+printf "    ${CYAN}woven init${RESET}       ${GRAY}# create a new project${RESET}\n"
+printf "    ${CYAN}woven add <pkg>${RESET}  ${GRAY}# add a dependency${RESET}\n"
+printf "    ${CYAN}woven install${RESET}    ${GRAY}# install all dependencies${RESET}\n"
+printf "    ${CYAN}woven run <cmd>${RESET}  ${GRAY}# run inside the virtual env${RESET}\n"
+printf "\n"
