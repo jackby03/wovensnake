@@ -45,7 +45,7 @@ Managing packages shouldn't be a tangle. WovenSnake keeps things organized:
 
 **macOS / Linux**:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jackby03/wovensnake/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/jackby03/wovensnake/main/scripts/install.sh | bash
 ```
 
 The installer auto-detects your architecture (arm64 or x86_64), downloads the right binary, and optionally adds `woven` to your PATH. Pass `--yes` to skip all prompts.
