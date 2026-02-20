@@ -21,6 +21,7 @@ jobs:
           - os: ubuntu-latest
             artifact_name: woven
             asset_name: woven-linux-amd64
+            target: x86_64-unknown-linux-musl
           - os: windows-latest
             artifact_name: woven.exe
             asset_name: woven-windows-amd64.exe
@@ -38,9 +39,15 @@ jobs:
         uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: stable
+          targets: ${{ matrix.target }}
+
+      - name: Install musl tools (Linux)
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: sudo apt-get install -y musl-tools
 
       - name: Build Release
-        run: cargo build --release --verbose
+        run: cargo build --release --verbose ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
+        shell: bash
 
       - name: Extract Changelog
         shell: bash
@@ -53,13 +60,14 @@ jobs:
       - name: Prepare Asset
         shell: bash
         run: |
-          cd target/release
-          mv ${{ matrix.artifact_name }} ${{ matrix.asset_name }}
+          RELEASE_DIR="target/${{ matrix.target && format('{0}/release', matrix.target) || 'release' }}"
+          mv "$RELEASE_DIR/${{ matrix.artifact_name }}" "$RELEASE_DIR/${{ matrix.asset_name }}"
+          echo "ASSET_PATH=$RELEASE_DIR/${{ matrix.asset_name }}" >> "$GITHUB_ENV"
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: target/release/${{ matrix.asset_name }}
+          files: ${{ env.ASSET_PATH }}
           body_path: release_notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
