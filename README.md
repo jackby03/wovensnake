@@ -21,6 +21,7 @@ Managing packages shouldn't be a tangle. WovenSnake keeps things organized:
 *   **⚡ Swift Knitting**: Parallel resolution and installation that finishes before your tea is ready.
 *   **🔒 Secure Stitching**: Deterministic `wovenpkg.lock` ensures every install is identical.
 *   **📦 Global Cache**: Shared storage in `~/.wovensnake/cache` to avoid downloading the same package twice.
+*   **🌍 Truly Cross-Platform**: Native binaries for macOS (arm64 & x86_64), Linux, and Windows — no Rosetta 2 penalty on Apple Silicon.
 *   **🧶 Self-Mending**: Automatically removes loose threads (unused packages) to keep your project clean.
 *   **🏠 Zero-Config Home**: Creates virtual environments automatically, so your packages have a safe place to live.
 
@@ -28,11 +29,13 @@ Managing packages shouldn't be a tangle. WovenSnake keeps things organized:
 
 ## 💻 Platform Support
 
-| Operating System | Status |
-| :--- | :--- |
-| **Windows** | ✅ Supported |
-| **Linux** | 🏗️ In Progress |
-| **macOS** | 🏗️ In Progress |
+| Operating System | Architecture | Status |
+| :--- | :--- | :--- |
+| **macOS** | Apple Silicon (arm64) | ✅ Supported |
+| **macOS** | Intel (x86_64) | ✅ Supported |
+| **Linux** | x86_64 | ✅ Supported |
+| **Linux** | aarch64 | ✅ Supported |
+| **Windows** | x86_64 | ✅ Supported |
 
 ---
 
@@ -40,15 +43,28 @@ Managing packages shouldn't be a tangle. WovenSnake keeps things organized:
 
 ### 🚀 Automatic (Recommended)
 
+**macOS / Linux**:
+```bash
+curl -fsSL https://raw.githubusercontent.com/jackby03/wovensnake/main/scripts/install.sh | sh
+```
+
+The installer auto-detects your architecture (arm64 or x86_64), downloads the right binary, and optionally adds `woven` to your PATH. Pass `--yes` to skip all prompts.
+
 **Windows (PowerShell)**:
 ```powershell
 iwr -useb https://raw.githubusercontent.com/jackby03/wovensnake/main/scripts/install.ps1 | iex
 ```
 
-**Linux / macOS** (In Progress):
-```bash
-curl -fsSL https://raw.githubusercontent.com/jackby03/wovensnake/main/scripts/install.sh | sh
-```
+### 📦 Pre-built Binaries
+
+Download the binary for your platform from the [latest release](https://github.com/jackby03/wovensnake/releases/latest):
+
+| Platform | Binary |
+| :--- | :--- |
+| macOS (Apple Silicon) | `woven-macos-arm64` |
+| macOS (Intel) | `woven-macos-amd64` |
+| Linux (x86_64) | `woven-linux-amd64` |
+| Windows (x86_64) | `woven-windows-amd64.exe` |
 
 ### 🦀 From Source (Rustaceans)
 ```bash
