@@ -8,15 +8,44 @@ EXE_NAME="woven"
 echo "🧶 WovenSnake Installer"
 echo "-----------------------"
 
-# 1. Detect OS
+# 1. Detect OS and architecture
 OS="$(uname -s)"
+ARCH="$(uname -m)"
+
 case "$OS" in
-    Linux*)     ASSET="woven-linux-amd64";;
-    Darwin*)    ASSET="woven-macos-amd64";;
-    *)          echo "Unsupported OS: $OS"; exit 1;;
+    Linux*)
+        case "$ARCH" in
+            x86_64)  ASSET="woven-linux-amd64";;
+            aarch64) ASSET="woven-linux-aarch64";;
+            *)       echo "Unsupported architecture: $ARCH"; exit 1;;
+        esac
+        ;;
+    Darwin*)
+        case "$ARCH" in
+            arm64)   ASSET="woven-macos-arm64";;
+            x86_64)  ASSET="woven-macos-amd64";;
+            *)       echo "Unsupported architecture: $ARCH"; exit 1;;
+        esac
+        ;;
+    *)
+        echo "Unsupported OS: $OS"; exit 1;;
 esac
 
-URL="https://github.com/$REPO/releases/latest/download/$ASSET"
+BASE_URL="https://github.com/$REPO/releases/latest/download"
+URL="$BASE_URL/$ASSET"
+
+# On macOS arm64: check if native arm64 binary exists (follows redirects); fall back to amd64 (Rosetta 2)
+if [ "$ARCH" = "arm64" ] && [ "$OS" = "Darwin" ]; then
+    HTTP_CODE=""
+    if command -v curl >/dev/null 2>&1; then
+        HTTP_CODE="$(curl -o /dev/null -s -w "%{http_code}" -L "$URL")"
+    fi
+    if [ "$HTTP_CODE" != "200" ]; then
+        echo "Note: No native arm64 binary found (HTTP $HTTP_CODE), using amd64 via Rosetta 2."
+        ASSET="woven-macos-amd64"
+        URL="$BASE_URL/$ASSET"
+    fi
+fi
 
 # 2. Prepare Directory
 mkdir -p "$INSTALL_DIR"
