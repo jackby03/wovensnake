@@ -27,6 +27,9 @@ jobs:
           - os: macos-latest
             artifact_name: woven
             asset_name: woven-macos-amd64
+          - os: macos-14
+            artifact_name: woven
+            asset_name: woven-macos-arm64
 
     steps:
       - uses: actions/checkout@v4

@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-02-20
+
+### Added
+- **macOS/Linux Compatibility**: Full native support for macOS (arm64 & x86_64) and Linux (amd64 & aarch64). Platform detection is now based on compile-time target rather than defaulting to `manylinux` on all non-Windows platforms.
+- **Wheel Platform Parsing**: New `platform_from_filename()` logic correctly classifies `macosx_*`, `manylinux_*`, `win_amd64`, and `py3-none-any` wheels from PyPI filenames.
+- **Artifact Selection Fallback**: `select_artifact` now tries exact platform → family fallback (macOS arm64 → x86_64 via Rosetta 2, Linux aarch64 → manylinux) → universal wheel → source distribution.
+- **Unix Permissions**: `.so` libraries and scripts extracted from wheels now have their Unix file modes preserved (fixes `permission denied` errors on macOS/Linux).
+- **Python Symlink**: On Unix, `python → python3` symlink is created after managed Python installs so both names work.
+- **Interactive Installer** (`scripts/install.sh`): ASCII banner, colored step progress, spinner animation, arch-aware binary selection (arm64 with amd64 Rosetta fallback), `--yes`, `--no-modify-path`, and `--install-dir` flags.
+- **Bash Playground Validator** (`scripts/validate_playground.sh`): macOS/Linux equivalent of the existing PowerShell script, generating the same HTML report.
+- **macOS arm64 Release Binary**: CI now builds a native `woven-macos-arm64` binary on `macos-14` runners.
+
+### Fixed
+- **PyPI Resolver**: Range specifiers (e.g. `>=2,<4`) are no longer passed directly to the versioned PyPI endpoint (`/pypi/{name}/{version}/json`), which returned 404. The resolver now fetches the latest release for range constraints and applies version filtering locally.
+- **Installer Asset Check**: `install.sh` now follows HTTP redirects when checking if a GitHub Release asset exists, preventing false 404s on valid URLs.
+
 ## [0.2.0] - 2025-12-25
 
 ### Added
