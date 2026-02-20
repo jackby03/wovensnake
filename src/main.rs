@@ -28,15 +28,20 @@ enum Commands {
         #[arg(short, long)]
         yes: bool,
     },
-    /// Add a new package to the project
+    /// Add a new package to the project (alias: use `woven install <pkg>`)
+    #[command(hide = true)]
     Add {
         /// Name of the package to add
         name: String,
         /// Optional version of the package
         version: Option<String>,
     },
-    /// Install dependencies from wovenpkg.json
-    Install,
+    /// Install dependencies, or add and install specific packages
+    Install {
+        /// Packages to add (e.g. requests, flask==3.0.0). Installs all if omitted.
+        #[arg(trailing_var_arg = true)]
+        packages: Vec<String>,
+    },
     /// Update dependencies to their latest versions
     Update,
     /// Run a command within the virtual environment
@@ -84,9 +89,24 @@ async fn main() {
                 ux::print_error(format!("Failed to add package '{name}': {e}"));
             }
         }
-        Commands::Install => {
-            if let Err(e) = cli::install::execute(false).await {
-                ux::print_error(format!("Installation failed: {e}"));
+        Commands::Install { packages } => {
+            if packages.is_empty() {
+                // woven install  →  install all from wovenpkg.json
+                if let Err(e) = cli::install::execute(false).await {
+                    ux::print_error(format!("Installation failed: {e}"));
+                }
+            } else {
+                // woven install requests flask==3.0.0  →  add each package then install
+                for pkg in &packages {
+                    let (name, version) = pkg
+                        .split_once("==")
+                        .map(|(n, v)| (n.to_string(), Some(v.to_string())))
+                        .unwrap_or_else(|| (pkg.clone(), None));
+                    if let Err(e) = cli::add::execute(&name, version).await {
+                        ux::print_error(format!("Failed to add '{name}': {e}"));
+                        break;
+                    }
+                }
             }
         }
         Commands::Update => {

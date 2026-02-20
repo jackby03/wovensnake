@@ -103,37 +103,34 @@ Prepares `wovenpkg.json` for your project.
 woven init
 ```
 
-### 2. Add a New Thread (`add`)
-Adds a package from PyPI to your project and installs it immediately.
+### 2. Knit Dependencies (`install`)
+Install all dependencies from `wovenpkg.json`, or add and install specific packages in one step:
 ```bash
-woven add requests
+woven install                    # install everything in wovenpkg.json
+woven install requests           # add requests and install
+woven install requests flask     # add multiple packages
+woven install flask==3.0.0       # add a specific version
 ```
 
-### 3. Knit Dependencies (`install`)
-Reads your pattern, gathers materials, and weaves the environment.
-```bash
-woven install
-```
-
-### 4. Run in the Nest (`run`)
+### 3. Run in the Nest (`run`)
 Execute any command within the context of your virtual environment.
 ```bash
 woven run python main.py
 ```
 
-### 5. Tidy Up (`remove`)
+### 4. Tidy Up (`remove`)
 Gently removes a package and its unused threads.
 ```bash
 woven remove flask
 ```
 
-### 6. View the Tapestry (`list`)
+### 5. View the Tapestry (`list`)
 Admire the packages currently woven into your project.
 ```bash
 woven list
 ```
 
-### 7. Fresh Start (`clean`)
+### 6. Fresh Start (`clean`)
 Clears the virtual environment and local packages. Use `--all` to clear the global cache too.
 ```bash
 woven clean
