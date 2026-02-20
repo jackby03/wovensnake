@@ -71,6 +71,30 @@ Download the binary for your platform from the [latest release](https://github.c
 cargo install --path .
 ```
 
+### ♻️ Updating
+
+Re-run the installer — it will overwrite the existing binary:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jackby03/wovensnake/main/scripts/install.sh | bash
+```
+
+### 🗑️ Uninstalling
+
+```bash
+# 1. Remove the binary
+rm -f ~/.local/bin/woven
+
+# 2. Remove the PATH entry added by the installer (if any)
+#    Edit ~/.bashrc, ~/.zshrc, or ~/.profile and delete the line:
+#    export PATH="$HOME/.local/bin:$PATH"
+
+# 3. (Optional) Remove the global cache and managed Pythons
+rm -rf ~/.wovensnake
+```
+
+On **Windows**, delete `%USERPROFILE%\.local\bin\woven.exe` and remove the corresponding entry from your user `PATH` in System Properties.
+
 ---
 
 ## 🎮 How to Use
