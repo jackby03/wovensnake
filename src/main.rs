@@ -57,6 +57,13 @@ enum Commands {
         #[arg(long)]
         python: bool,
     },
+    /// Uninstall WovenSnake from this machine
+    #[command(name = "self-uninstall")]
+    SelfUninstall {
+        /// Skip confirmation prompt
+        #[arg(short, long)]
+        yes: bool,
+    },
 }
 
 #[tokio::main]
@@ -106,6 +113,11 @@ async fn main() {
         Commands::Clean { all, python } => {
             if let Err(e) = cli::clean::execute(all, python) {
                 ux::print_error(format!("Clean failed: {e}"));
+            }
+        }
+        Commands::SelfUninstall { yes } => {
+            if let Err(e) = cli::self_uninstall::execute(yes) {
+                ux::print_error(format!("Uninstall failed: {e}"));
             }
         }
     }
