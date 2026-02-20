@@ -1,9 +1,31 @@
 name: Release & Publish
 
+# ─── WHEN TO TRIGGER ──────────────────────────────────────────────────────────
+# Only tag + release when Rust source code changes (src/, Cargo.toml).
+#
+# Versioning rules (SemVer):
+#   PATCH  0.3.x → 0.3.x+1  bug fixes in src/
+#   MINOR  0.3.x → 0.4.0    new features in src/
+#   MAJOR  0.x   → 1.0.0    breaking API changes
+#
+# Changes to scripts/, README.md, CHANGELOG.md, .github/ (non-workflow)
+# should be pushed to main WITHOUT a tag — they are served from the main
+# branch URL and do not require new binaries.
+#
+# To release:
+#   1. Bump version in Cargo.toml
+#   2. Add entry to CHANGELOG.md
+#   3. git tag -a vX.Y.Z -m "..." && git push origin vX.Y.Z
+# ──────────────────────────────────────────────────────────────────────────────
 on:
   push:
     tags:
-      - "v*"
+      - "v*"       # push a tag ONLY when src/ or Cargo.toml changes (see policy above)
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.4.0) — must already exist in the repo"
+        required: true
 
 permissions:
   contents: write
@@ -34,6 +56,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@v1
@@ -52,8 +76,10 @@ jobs:
       - name: Extract Changelog
         shell: bash
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          # Extract content between the version header and the next header
+          # Resolve version from tag push or manual dispatch input
+          RAW_REF="${{ github.event.inputs.tag || github.ref }}"
+          VERSION="${RAW_REF#refs/tags/v}"
+          VERSION="${VERSION#v}"   # strip leading 'v' if workflow_dispatch passed 'v0.4.0'
           sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '1d;$d' > release_notes.md
 
       # Prepare asset name (Cross-platform way using bash which works on all runners)
@@ -67,6 +93,7 @@ jobs:
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
           files: ${{ env.ASSET_PATH }}
           body_path: release_notes.md
         env:
