@@ -4,37 +4,56 @@ description: Workflow for improvements and refactoring in WovenSnake
 
 Follow these steps when making improvements or refactoring code in WovenSnake:
 
-1.  **Branching**: Create a new branch from `main` with the prefix `refactor/` or `perf/`.
+1. **Branching**: Create a new branch from `main` with the prefix `refactor/` or `perf/`.
+   ```bash
+   git checkout -b refactor/your-improvement-name main
+   ```
+
+2. **Scope the Change**:
+   - Identify what the improvement touches: CLI, core, dependencies, scripts, or docs.
+   - If the change is limited to `scripts/`, `README.md`, or `.agent/` — no version bump or release tag is needed. Just push to `main`.
+   - If `src/` or `Cargo.toml` is changed, a PATCH or MINOR bump is required.
+
+3. **Benchmarking** (for performance work):
+   - Run before and after to justify the change.
+   - Use `cargo build --release` for representative timing.
+
+4. **Refactoring**:
+   - Maintain the existing public API where possible.
+   - Keep cross-platform compatibility (`#[cfg(unix)]`, `#[cfg(windows)]`).
+   - Do not introduce `woven add` references — the command is `woven install <pkg>`.
+
+5. **Verification**:
+   ```bash
+   cargo test
+   ```
+
+6. **Playground Validation** — crucial for refactors that touch the install or resolution path:
+   ```bash
+   # macOS / Linux
+   ./scripts/validate_playground.sh
+
+   # Windows
+   ./scripts/validate_playground.ps1
+   ```
+
+7. **Linting**:
+   ```bash
+   cargo clippy -- -D warnings
+   cargo fmt -- --check
+   ```
+
+8. **Commit & PR**:
+   - Use conventional commits: `refactor:`, `perf:`, `chore:`.
+   - Create a PR targeting `main`.
+
+9. **Verification & Merge (Mandatory)**:
+   - Wait for CI to go green. **Never merge on red.**
+   - Merge method: **Squash and Merge** only.
+
+10. **Post-Merge Cleanup**:
     ```bash
-    git checkout -b refactor/your-improvement-name main
+    git push origin --delete refactor/your-improvement-name
+    git checkout main && git pull origin main
+    git branch -D refactor/your-improvement-name
     ```
-2.  **Benchmarking (Optional but Recommended)**:
-    *   If making performance improvements, run existing benchmarks or create new ones to justify the change.
-3.  **Refactoring**:
-    *   Maintain the existing API where possible to avoid breaking changes.
-    *   Keep the "Hiss!" spirit and project style.
-4.  **Verification**:
-    *   Run existing tests to ensure no regressions:
-        ```bash
-        cargo test
-        ```
-// turbo
-5.  **Playground Validation**:
-    *   Crucial for refactors! Ensure the end-to-end flow remains intact:
-        ```powershell
-        ./scripts/validate_playground.ps1
-        ```
-6.  **Linting**:
-    *   Run clippy and fmt:
-        ```bash
-        cargo clippy -- -D warnings
-        cargo fmt -- --check
-        ```
-7.  **PR Submission**:
-    *   Commit using conventional commits.
-    *   Create a PR targeting `main`.
-8.  **Phase 3: Verification & Merge (Mandatory)**:
-    *   **Wait for CI**: Ensure checks pass on GitHub.
-    *   **Merge**: Squash and Merge only.
-    *   **Cleanup**: Delete remote and local branches.
-    *   **Sync**: Pull `main` locally.
