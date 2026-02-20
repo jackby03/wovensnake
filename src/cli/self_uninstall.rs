@@ -87,11 +87,6 @@ fn clean_path_from_rc_files() {
         return;
     };
 
-    let patterns = [
-        r#"export PATH="$HOME/.local/bin:$PATH""#,
-        r#"export PATH="$HOME/.local/bin:$PATH" # added by woven installer"#,
-    ];
-
     for rc_name in RC_FILES {
         let rc = home.join(rc_name);
         if !rc.exists() {
@@ -100,9 +95,14 @@ fn clean_path_from_rc_files() {
         let Ok(content) = fs::read_to_string(&rc) else {
             continue;
         };
+        // Remove lines that reference our install dir or the WovenSnake comment block
         let cleaned: String = content
             .lines()
-            .filter(|line| !patterns.iter().any(|p| line.trim() == *p))
+            .filter(|line| {
+                !line.contains(".wovensnake/bin")
+                    && !line.contains("wovensnake")
+                    && line.trim() != "# WovenSnake"
+            })
             .map(|l| format!("{l}\n"))
             .collect();
         if cleaned != content {

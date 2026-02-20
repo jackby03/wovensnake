@@ -81,11 +81,17 @@ curl -fsSL https://raw.githubusercontent.com/jackby03/wovensnake/main/scripts/in
 
 ### 🗑️ Uninstalling
 
+**macOS / Linux** — run the uninstall script (works even if `woven` is broken or not in PATH):
+```bash
+curl -fsSL https://raw.githubusercontent.com/jackby03/wovensnake/main/scripts/uninstall.sh | bash
+```
+
+Or if `woven` is already working:
 ```bash
 woven self-uninstall
 ```
 
-This removes the binary, the global cache (`~/.wovensnake`), and cleans the `PATH` entry from your shell rc files. Add `--yes` to skip the confirmation prompt.
+Both options remove the binary, the global cache (`~/.wovensnake`), and clean the `PATH` entry from your shell rc files. Add `--yes` to skip the confirmation prompt.
 
 ---
 
