@@ -3,8 +3,8 @@ set -euo pipefail
 
 # ─── Colors ────────────────────────────────────────────────────────────────────
 if [ -t 1 ]; then
-    BOLD='\033[1m'; DIM='\033[2m'; RESET='\033[0m'
-    CYAN='\033[36m'; GREEN='\033[32m'; RED='\033[31m'; YELLOW='\033[33m'; BLUE='\033[34m'; GRAY='\033[90m'
+    BOLD=$'\033[1m'; DIM=$'\033[2m'; RESET=$'\033[0m'
+    CYAN=$'\033[36m'; GREEN=$'\033[32m'; RED=$'\033[31m'; YELLOW=$'\033[33m'; BLUE=$'\033[34m'; GRAY=$'\033[90m'
 else
     BOLD=''; DIM=''; RESET=''; CYAN=''; GREEN=''; RED=''; YELLOW=''; BLUE=''; GRAY=''
 fi
@@ -188,8 +188,8 @@ fi
 # ─── Done ──────────────────────────────────────────────────────────────────────
 printf "\n${BOLD}${GREEN}  ✨ WovenSnake installed successfully!${RESET}\n\n"
 printf "  ${GRAY}Get started:${RESET}\n"
-printf "    ${CYAN}woven init${RESET}       ${GRAY}# create a new project${RESET}\n"
-printf "    ${CYAN}woven add <pkg>${RESET}  ${GRAY}# add a dependency${RESET}\n"
-printf "    ${CYAN}woven install${RESET}    ${GRAY}# install all dependencies${RESET}\n"
-printf "    ${CYAN}woven run <cmd>${RESET}  ${GRAY}# run inside the virtual env${RESET}\n"
+printf "    ${CYAN}woven init${RESET}              ${GRAY}# create a new project${RESET}\n"
+printf "    ${CYAN}woven install requests${RESET}  ${GRAY}# add and install a package${RESET}\n"
+printf "    ${CYAN}woven install${RESET}           ${GRAY}# install all dependencies${RESET}\n"
+printf "    ${CYAN}woven run <cmd>${RESET}         ${GRAY}# run inside the virtual env${RESET}\n"
 printf "\n"

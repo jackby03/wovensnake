@@ -3,8 +3,8 @@ set -euo pipefail
 
 # ─── Colors ────────────────────────────────────────────────────────────────────
 if [ -t 1 ]; then
-    BOLD='\033[1m'; DIM='\033[2m'; RESET='\033[0m'
-    CYAN='\033[36m'; GREEN='\033[32m'; RED='\033[31m'; YELLOW='\033[33m'; GRAY='\033[90m'
+    BOLD=$'\033[1m'; DIM=$'\033[2m'; RESET=$'\033[0m'
+    CYAN=$'\033[36m'; GREEN=$'\033[32m'; RED=$'\033[31m'; YELLOW=$'\033[33m'; GRAY=$'\033[90m'
 else
     BOLD=''; DIM=''; RESET=''; CYAN=''; GREEN=''; RED=''; YELLOW=''; GRAY=''
 fi
