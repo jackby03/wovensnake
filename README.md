@@ -121,11 +121,12 @@ woven clean
 
 ## 🧸 Support the Nest
 
-Building such a cozy tool takes care and patience. If WovenSnake brought you comfort, consider donating a warm coffee:
+Building such a cozy tool takes care and patience. If WovenSnake brought you comfort, consider supporting:
 
-<a href='https://ko-fi.com/jackby03' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi2.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
-
-*(Open Collective coming ssssoon...)*
+<p align="center">
+  <a href="https://ko-fi.com/jackby03"><img src="https://img.shields.io/badge/Ko--fi-Support_on_Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi" /></a>
+  <a href="https://publishers.basicattentiontoken.org/en/c/jackby03"><img src="https://img.shields.io/badge/BAT-Brave_Rewards-FB542B?style=for-the-badge&logo=brave&logoColor=white" alt="BAT" /></a>
+</p>
 
 ---
 
