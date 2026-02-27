@@ -114,6 +114,93 @@ pub fn extract_wheel(wheel_path: &Path, dest_path: &Path) -> Result<(), Box<dyn 
     Ok(())
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use flate2::write::GzEncoder;
+    use flate2::Compression;
+    use tar::Builder;
+
+    fn build_sdist_targz(archive_path: &Path) {
+        let file = fs::File::create(archive_path).unwrap();
+        let gz = GzEncoder::new(file, Compression::default());
+        let mut tar = Builder::new(gz);
+
+        // top-level sdist directory entry
+        let mut header = tar::Header::new_gnu();
+        header.set_entry_type(tar::EntryType::Directory);
+        header.set_size(0);
+        header.set_mode(0o755);
+        header.set_cksum();
+        tar.append_data(&mut header, "mypkg-1.0.0/", std::io::empty()).unwrap();
+
+        // sub-package directory
+        let mut header = tar::Header::new_gnu();
+        header.set_entry_type(tar::EntryType::Directory);
+        header.set_size(0);
+        header.set_mode(0o755);
+        header.set_cksum();
+        tar.append_data(&mut header, "mypkg-1.0.0/mypkg/", std::io::empty()).unwrap();
+
+        // __init__.py inside the package
+        let content = b"# mypkg\n";
+        let mut header = tar::Header::new_gnu();
+        header.set_size(content.len() as u64);
+        header.set_mode(0o644);
+        header.set_cksum();
+        tar.append_data(&mut header, "mypkg-1.0.0/mypkg/__init__.py", content.as_ref()).unwrap();
+
+        // setup.py at sdist root
+        let content = b"from setuptools import setup\nsetup()\n";
+        let mut header = tar::Header::new_gnu();
+        header.set_size(content.len() as u64);
+        header.set_mode(0o644);
+        header.set_cksum();
+        tar.append_data(&mut header, "mypkg-1.0.0/setup.py", content.as_ref()).unwrap();
+
+        tar.finish().unwrap();
+    }
+
+    #[test]
+    fn test_extract_targz_strips_toplevel_dir() {
+        let tmp = tempfile::tempdir().unwrap();
+        let archive_path = tmp.path().join("mypkg-1.0.0.tar.gz");
+        let site_packages = tmp.path().join("site-packages");
+        fs::create_dir_all(&site_packages).unwrap();
+
+        build_sdist_targz(&archive_path);
+        extract_targz(&archive_path, &site_packages).unwrap();
+
+        // The package must be importable directly from site-packages
+        assert!(
+            site_packages.join("mypkg/__init__.py").exists(),
+            "mypkg/__init__.py should be at the site-packages root"
+        );
+        // The sdist wrapper directory must NOT exist
+        assert!(
+            !site_packages.join("mypkg-1.0.0").exists(),
+            "sdist root directory should not appear in site-packages"
+        );
+    }
+
+    #[test]
+    fn test_extract_targz_includes_sibling_files() {
+        let tmp = tempfile::tempdir().unwrap();
+        let archive_path = tmp.path().join("mypkg-1.0.0.tar.gz");
+        let site_packages = tmp.path().join("site-packages");
+        fs::create_dir_all(&site_packages).unwrap();
+
+        build_sdist_targz(&archive_path);
+        extract_targz(&archive_path, &site_packages).unwrap();
+
+        // setup.py (a sibling at the sdist root) should also be present after stripping
+        assert!(
+            site_packages.join("setup.py").exists(),
+            "setup.py from sdist root should be extracted"
+        );
+    }
+}
+
 pub fn generate_scripts(dist_info_path: &Path, scripts_dir: &Path, python_version: &str) -> Result<(), Box<dyn Error>> {
     let entry_points_path = dist_info_path.join("entry_points.txt");
     if !entry_points_path.exists() {
@@ -200,24 +287,34 @@ pub fn extract_targz(path: &Path, dest_path: &Path) -> Result<(), Box<dyn Error>
     let tar = GzDecoder::new(tar_gz);
     let mut archive = Archive::new(tar);
 
-    // Most sdists have a single top-level directory. We want to extract its contents directly if possible,
-    // but the 'tar' crate doesn't make it super easy to strip levels without manual iteration.
-    // For now, we extract everything.
-    archive.unpack(dest_path)?;
+    if !dest_path.exists() {
+        fs::create_dir_all(dest_path)?;
+    }
 
-    // Post-extraction: Find if there's a nested folder that should be moved up.
-    // E.g. site-packages/package-1.0.0/package -> site-packages/package
-    if let Ok(entries) = fs::read_dir(dest_path) {
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if path.is_dir() {
-                let name = entry.file_name().into_string().unwrap_or_default();
-                if name.contains('-') {
-                    // Potential sdist root like atomicwrites-1.4.1
-                    // We could move its children up, but that's complex to do during installation safely.
-                    // The user can always manually fix or we can implement a .pth generator.
+    // Sdist archives always contain a single top-level directory like "requests-2.31.0/".
+    // We strip that prefix so the package contents land directly in site-packages,
+    // making the package importable without any post-install step.
+    for entry in archive.entries()? {
+        let mut entry = entry?;
+        let entry_path = entry.path()?.into_owned();
+
+        // Skip the top-level directory itself; strip its name from every other path.
+        let stripped: std::path::PathBuf = entry_path.components().skip(1).collect();
+        if stripped.as_os_str().is_empty() {
+            continue;
+        }
+
+        let outpath = dest_path.join(&stripped);
+
+        if entry.header().entry_type().is_dir() {
+            fs::create_dir_all(&outpath)?;
+        } else {
+            if let Some(parent) = outpath.parent() {
+                if !parent.exists() {
+                    fs::create_dir_all(parent)?;
                 }
             }
+            entry.unpack(&outpath)?;
         }
     }
 
