@@ -15,7 +15,7 @@ use crate::core::lock::{Artifact, LockedPackage, Lockfile};
 use crate::core::selection::select_artifact;
 use crate::dependencies::package;
 
-fn current_platform() -> &'static str {
+const fn current_platform() -> &'static str {
     if cfg!(windows) {
         "win_amd64"
     } else if cfg!(target_os = "macos") {

@@ -70,15 +70,13 @@ pub fn execute(non_interactive: bool) -> Result<(), Box<dyn std::error::Error>> 
             .items(&venv_options)
             .interact()?;
 
-        let venv = if venv_selection == 0 {
-            ".venv".to_string()
-        } else {
+        if venv_selection != 0 {
             println!(
                 "{}",
                 style("Note: Centralized venvs are partially supported. Defaulting to local config for now.").yellow()
             );
-            ".venv".to_string()
-        };
+        }
+        let venv = ".venv".to_string();
 
         (name, py_ver, venv)
     };
@@ -109,7 +107,9 @@ pub fn execute(non_interactive: bool) -> Result<(), Box<dyn std::error::Error>> 
 
     fs::write(path, json)?;
 
-    if !non_interactive {
+    if non_interactive {
+        println!("Initialized project.");
+    } else {
         println!(
             "\n{} {}",
             Emoji("✨", ":-)"),
@@ -119,8 +119,6 @@ pub fn execute(non_interactive: bool) -> Result<(), Box<dyn std::error::Error>> 
             "Next step: Run {} to install dependencies.",
             style("woven install").cyan()
         );
-    } else {
-        println!("Initialized project.");
     }
 
     Ok(())

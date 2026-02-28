@@ -59,7 +59,7 @@ pub async fn resolve(
         // then the constraint is enforced by the caller.
         let fetch_version = version_constraint.as_deref().and_then(|v| {
             let trimmed = v.trim_start_matches("==");
-            if trimmed.chars().next().map_or(false, |c| c.is_ascii_digit()) {
+            if trimmed.chars().next().is_some_and(|c| c.is_ascii_digit()) {
                 Some(trimmed)
             } else {
                 None // range specifier → fetch latest
