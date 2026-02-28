@@ -84,17 +84,18 @@ jobs:
 
       # Prepare asset name (Cross-platform way using bash which works on all runners)
       - name: Prepare Asset
+        id: prep
         shell: bash
         run: |
           RELEASE_DIR="target/${{ matrix.target && format('{0}/release', matrix.target) || 'release' }}"
           mv "$RELEASE_DIR/${{ matrix.artifact_name }}" "$RELEASE_DIR/${{ matrix.asset_name }}"
-          echo "ASSET_PATH=$RELEASE_DIR/${{ matrix.asset_name }}" >> "$GITHUB_ENV"
+          echo "asset_path=$RELEASE_DIR/${{ matrix.asset_name }}" >> "$GITHUB_OUTPUT"
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
-          files: ${{ env.ASSET_PATH }}
+          files: ${{ steps.prep.outputs.asset_path }}
           body_path: release_notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
