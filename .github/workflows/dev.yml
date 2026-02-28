@@ -1,7 +1,21 @@
 name: Development CI
 
 on:
-  workflow_dispatch: # disabled: triggers removed (security scanning now handled by GitHub Advanced Security)
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
