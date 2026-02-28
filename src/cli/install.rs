@@ -231,7 +231,9 @@ async fn install_from_lock(
                         };
                         let hash = format!("{:x}", Sha256::digest(&data));
                         if hash != artifact.sha256 {
-                            pb.finish_with_message(format!("\x1b[31m✗\x1b[0m {name}: hash mismatch (corrupt download)"));
+                            pb.finish_with_message(format!(
+                                "\x1b[31m✗\x1b[0m {name}: hash mismatch (corrupt download)"
+                            ));
                             return;
                         }
                         if let Err(e) = cache.save(&artifact.filename, &artifact.sha256, &data) {
