@@ -176,7 +176,7 @@ async fn install_from_lock(
     cache: &Cache,
     packages_dir: &Path,
     site_packages: &Path,
-    _scripts_dir: &Path,
+    scripts_dir: &Path,
     multi: &MultiProgress,
 ) -> Result<usize, Box<dyn Error>> {
     let packages_to_install: Vec<_> = lockfile
@@ -193,6 +193,8 @@ async fn install_from_lock(
             let count = Arc::clone(&count);
             let site_packages = site_packages.to_path_buf();
             let packages_dir = packages_dir.to_path_buf();
+            let scripts_dir = scripts_dir.to_path_buf();
+            let python_version = lockfile.python_version.clone();
             let name = name.clone();
             let pkg = pkg.clone();
             let multi = multi.clone();
@@ -245,7 +247,8 @@ async fn install_from_lock(
                         }
                     }
 
-                    let extract_result = if artifact.filename.to_lowercase().ends_with(".whl") {
+                    let is_wheel = artifact.filename.to_lowercase().ends_with(".whl");
+                    let extract_result = if is_wheel {
                         package::extract_wheel(&dest_path, &site_packages)
                     } else {
                         package::extract_targz(&dest_path, &site_packages)
@@ -253,6 +256,14 @@ async fn install_from_lock(
                     if let Err(e) = extract_result {
                         pb.finish_with_message(format!("\x1b[31m✗\x1b[0m {name}: extract failed ({e})"));
                         return;
+                    }
+
+                    if is_wheel {
+                        if let Some(dist_info) = find_dist_info(&site_packages, &name) {
+                            if let Err(e) = package::generate_scripts(&dist_info, &scripts_dir, &python_version) {
+                                pb.println(format!("\x1b[33m⚠ Warning:\x1b[0m {name}: script generation failed ({e})"));
+                            }
+                        }
                     }
                 }
                 pb.finish_with_message(format!("\x1b[32m✓\x1b[0m {name}"));
@@ -270,7 +281,7 @@ async fn resolve_and_install_final(
     cache: &Cache,
     packages_dir: &Path,
     site_packages: &Path,
-    _scripts_dir: &Path,
+    scripts_dir: &Path,
     multi: &MultiProgress,
     lock_path: &Path,
 ) -> Result<usize, Box<dyn Error>> {
@@ -341,10 +352,20 @@ async fn resolve_and_install_final(
                 }
 
                 pb.set_message(format!("Installing: {}", node.name));
-                if pkg_url.filename.to_lowercase().ends_with(".whl") {
+                let is_wheel = pkg_url.filename.to_lowercase().ends_with(".whl");
+                if is_wheel {
                     package::extract_wheel(&dest_path, site_packages)?;
                 } else {
                     package::extract_targz(&dest_path, site_packages)?;
+                }
+                if is_wheel {
+                    if let Some(dist_info) = find_dist_info(site_packages, &node.name) {
+                        if let Err(e) =
+                            package::generate_scripts(&dist_info, scripts_dir, &config.python_version)
+                        {
+                            ux::print_warning(format!("Script generation failed for {}: {e}", node.name));
+                        }
+                    }
                 }
                 installed_count += 1;
             }
@@ -354,6 +375,16 @@ async fn resolve_and_install_final(
     lockfile.write(lock_path)?;
     pb.finish_with_message("\x1b[32m✓\x1b[0m Tree woven and environment satisfied.");
     Ok(installed_count)
+}
+
+/// Locate the `.dist-info` directory for a package inside `site_packages`.
+/// Only wheels produce a `.dist-info` dir; sdists do not.
+fn find_dist_info(site_packages: &Path, name: &str) -> Option<std::path::PathBuf> {
+    let normalized = name.to_lowercase().replace('-', "_");
+    std::fs::read_dir(site_packages).ok()?.filter_map(|e| e.ok()).find(|e| {
+        let fname = e.file_name().to_string_lossy().to_lowercase().replace('-', "_");
+        fname.starts_with(&normalized) && fname.ends_with(".dist-info")
+    }).map(|e| e.path())
 }
 
 fn prune_unused_packages(site_packages: &Path, lockfile: &Lockfile, multi: &MultiProgress) {
