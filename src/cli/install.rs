@@ -383,7 +383,7 @@ fn find_dist_info(site_packages: &Path, name: &str) -> Option<std::path::PathBuf
     let normalized = name.to_lowercase().replace('-', "_");
     std::fs::read_dir(site_packages)
         .ok()?
-        .filter_map(|e| e.ok())
+        .filter_map(std::result::Result::ok)
         .find(|e| {
             let fname = e.file_name().to_string_lossy().to_lowercase().replace('-', "_");
             fname.starts_with(&normalized) && fname.ends_with(".dist-info")
