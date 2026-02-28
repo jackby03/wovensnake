@@ -292,13 +292,9 @@ async fn resolve_and_install_final(
     let mut installed_count = 0;
 
     for (name_lower, node) in graph.packages {
-        // Build the locked package entry
-        // We still need to fetch info to get URLs for the lockfile
-        // TBD: Optimization: Resolver should probably return the info objects too
-        let info = package::fetch_package_info(&node.name, Some(&node.version)).await?;
-
+        // URLs were already fetched during resolution — no second PyPI request needed.
         let mut artifacts: Vec<Artifact> = Vec::new();
-        for url in &info.urls {
+        for url in &node.urls {
             if url.packagetype == "bdist_wheel" {
                 let platform = platform_from_filename(&url.filename);
 

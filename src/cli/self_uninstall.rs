@@ -99,12 +99,13 @@ fn clean_path_from_rc_files() {
             .filter(|line| {
                 !line.contains(".wovensnake/bin") && !line.contains("wovensnake") && line.trim() != "# WovenSnake"
             })
-            .map(|l| format!("{l}\n"))
-            .collect();
-        if cleaned != content {
-            if fs::write(&rc, cleaned).is_ok() {
-                ux::print_success(format!("Cleaned PATH entry from {}", rc.display()));
-            }
+            .fold(String::new(), |mut s, l| {
+                s.push_str(l);
+                s.push('\n');
+                s
+            });
+        if cleaned != content && fs::write(&rc, cleaned).is_ok() {
+            ux::print_success(format!("Cleaned PATH entry from {}", rc.display()));
         }
     }
 }

@@ -5,13 +5,15 @@ use std::error::Error;
 use std::str::FromStr;
 
 use crate::core::marker;
-use crate::dependencies::package;
+use crate::dependencies::package::{self, PackageUrl};
 
 #[derive(Debug, Clone)]
 pub struct ResolutionNode {
     pub name: String,
     pub version: String,
     pub dependencies: Vec<String>,
+    /// Download URLs already fetched during resolution — avoids a second `PyPI` request.
+    pub urls: Vec<PackageUrl>,
 }
 
 pub struct DependencyGraph {
@@ -93,6 +95,7 @@ pub async fn resolve(
                 name: info.info.name,
                 version: resolved_version,
                 dependencies: sub_deps,
+                urls: info.urls,
             },
         );
     }
