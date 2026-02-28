@@ -21,7 +21,7 @@ pub struct Info {
     pub requires_dist: Option<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PackageUrl {
     pub url: String,
     pub filename: String,
@@ -29,7 +29,7 @@ pub struct PackageUrl {
     pub digests: Digests,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Digests {
     pub sha256: String,
 }
