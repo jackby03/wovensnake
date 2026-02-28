@@ -140,7 +140,8 @@ mod tests {
         header.set_size(0);
         header.set_mode(0o755);
         header.set_cksum();
-        tar.append_data(&mut header, "mypkg-1.0.0/mypkg/", std::io::empty()).unwrap();
+        tar.append_data(&mut header, "mypkg-1.0.0/mypkg/", std::io::empty())
+            .unwrap();
 
         // __init__.py inside the package
         let content = b"# mypkg\n";
@@ -148,7 +149,8 @@ mod tests {
         header.set_size(content.len() as u64);
         header.set_mode(0o644);
         header.set_cksum();
-        tar.append_data(&mut header, "mypkg-1.0.0/mypkg/__init__.py", content.as_ref()).unwrap();
+        tar.append_data(&mut header, "mypkg-1.0.0/mypkg/__init__.py", content.as_ref())
+            .unwrap();
 
         // setup.py at sdist root
         let content = b"from setuptools import setup\nsetup()\n";
@@ -156,7 +158,8 @@ mod tests {
         header.set_size(content.len() as u64);
         header.set_mode(0o644);
         header.set_cksum();
-        tar.append_data(&mut header, "mypkg-1.0.0/setup.py", content.as_ref()).unwrap();
+        tar.append_data(&mut header, "mypkg-1.0.0/setup.py", content.as_ref())
+            .unwrap();
 
         tar.finish().unwrap();
     }

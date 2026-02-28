@@ -46,9 +46,7 @@ pub fn execute(yes: bool) -> Result<(), Box<dyn Error>> {
     ux::print_success("WovenSnake has been uninstalled.");
 
     #[cfg(windows)]
-    ux::print_info(
-        "On Windows, also remove the woven directory from your user PATH in System Properties.",
-    );
+    ux::print_info("On Windows, also remove the woven directory from your user PATH in System Properties.");
 
     Ok(())
 }
@@ -99,9 +97,7 @@ fn clean_path_from_rc_files() {
         let cleaned: String = content
             .lines()
             .filter(|line| {
-                !line.contains(".wovensnake/bin")
-                    && !line.contains("wovensnake")
-                    && line.trim() != "# WovenSnake"
+                !line.contains(".wovensnake/bin") && !line.contains("wovensnake") && line.trim() != "# WovenSnake"
             })
             .map(|l| format!("{l}\n"))
             .collect();
