@@ -2,7 +2,6 @@ use flate2::read::GzDecoder;
 use futures::StreamExt;
 use indicatif::{ProgressBar, ProgressStyle};
 use once_cell::sync::OnceCell;
-use reqwest;
 use serde::Deserialize;
 use std::env;
 use std::error::Error;
