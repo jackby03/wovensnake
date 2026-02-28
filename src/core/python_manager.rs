@@ -143,8 +143,7 @@ async fn download_and_extract_python(version: &str, dest: &Path) -> Result<(), B
 
     for url in urls {
         last_url.clone_from(&url);
-        let client = reqwest::Client::builder().user_agent("wovensnake").build()?;
-        match client.get(&url).send().await {
+        match crate::core::http::CLIENT.get(&url).send().await {
             Ok(res) if res.status().is_success() => {
                 response = Some(res);
                 break;
@@ -361,8 +360,6 @@ async fn resolve_python_assets(version: &str) -> Result<Vec<String>, Box<dyn Err
 
     println!("Resolving Python {} for {} via GitHub API...", version, platform_key);
 
-    let client = reqwest::Client::builder().user_agent("wovensnake").build()?;
-
     // We fetch releases page by page until we find at least one matching asset
     let mut all_assets = Vec::new();
     for page in 1..=5 {
@@ -371,7 +368,7 @@ async fn resolve_python_assets(version: &str) -> Result<Vec<String>, Box<dyn Err
             PYTHON_BUILD_STANDALONE_REPO, page
         );
 
-        let mut request = client.get(&url);
+        let mut request = crate::core::http::CLIENT.get(&url);
         if let Ok(token) = env::var("GITHUB_TOKEN") {
             request = request.header("Authorization", format!("token {}", token));
         }
