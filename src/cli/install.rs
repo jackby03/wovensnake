@@ -207,28 +207,50 @@ async fn install_from_lock(
                 );
                 pb.set_message(format!("Syncing: {name}"));
 
-                if let Some(artifact) =
-                    select_artifact(&pkg.artifacts, current_platform())
-                {
+                if let Some(artifact) = select_artifact(&pkg.artifacts, current_platform()) {
                     let dest_path = packages_dir.join(&artifact.filename);
+
                     if cache.contains(&artifact.filename, &artifact.sha256) {
-                        let _ = cache.link_to_project(&artifact.filename, &artifact.sha256, &packages_dir);
+                        if let Err(e) = cache.link_to_project(&artifact.filename, &artifact.sha256, &packages_dir) {
+                            pb.println(format!("\x1b[33m⚠ Warning:\x1b[0m {name}: cache link failed ({e})"));
+                        }
                     } else if !dest_path.exists() {
-                        if let Ok(res) = reqwest::get(&artifact.url).await {
-                            if let Ok(data) = res.bytes().await {
-                                let hash = format!("{:x}", Sha256::digest(&data));
-                                if hash == artifact.sha256 {
-                                    let _ = cache.save(&artifact.filename, &artifact.sha256, &data);
-                                    let _ = std::fs::write(&dest_path, &data);
-                                }
+                        let res = match reqwest::get(&artifact.url).await {
+                            Ok(r) => r,
+                            Err(e) => {
+                                pb.finish_with_message(format!("\x1b[31m✗\x1b[0m {name}: request failed ({e})"));
+                                return;
                             }
+                        };
+                        let data = match res.bytes().await {
+                            Ok(d) => d,
+                            Err(e) => {
+                                pb.finish_with_message(format!("\x1b[31m✗\x1b[0m {name}: download failed ({e})"));
+                                return;
+                            }
+                        };
+                        let hash = format!("{:x}", Sha256::digest(&data));
+                        if hash != artifact.sha256 {
+                            pb.finish_with_message(format!("\x1b[31m✗\x1b[0m {name}: hash mismatch (corrupt download)"));
+                            return;
+                        }
+                        if let Err(e) = cache.save(&artifact.filename, &artifact.sha256, &data) {
+                            pb.println(format!("\x1b[33m⚠ Warning:\x1b[0m {name}: cache save failed ({e})"));
+                        }
+                        if let Err(e) = std::fs::write(&dest_path, &data) {
+                            pb.finish_with_message(format!("\x1b[31m✗\x1b[0m {name}: write failed ({e})"));
+                            return;
                         }
                     }
 
-                    if artifact.filename.to_lowercase().ends_with(".whl") {
-                        let _ = package::extract_wheel(&dest_path, &site_packages);
+                    let extract_result = if artifact.filename.to_lowercase().ends_with(".whl") {
+                        package::extract_wheel(&dest_path, &site_packages)
                     } else {
-                        let _ = package::extract_targz(&dest_path, &site_packages);
+                        package::extract_targz(&dest_path, &site_packages)
+                    };
+                    if let Err(e) = extract_result {
+                        pb.finish_with_message(format!("\x1b[31m✗\x1b[0m {name}: extract failed ({e})"));
+                        return;
                     }
                 }
                 pb.finish_with_message(format!("\x1b[32m✓\x1b[0m {name}"));
@@ -311,16 +333,20 @@ async fn resolve_and_install_final(
                     pb.set_message(format!("Downloading: {}", node.name));
                     package::download_package(&pkg_url.url, &dest_path).await?;
                     let data = std::fs::read(&dest_path)?;
-                    let _ = cache.save(&pkg_url.filename, &pkg_url.sha256, &data);
+                    if let Err(e) = cache.save(&pkg_url.filename, &pkg_url.sha256, &data) {
+                        ux::print_warning(format!("Cache save failed for {}: {e}", node.name));
+                    }
                 } else if cache.contains(&pkg_url.filename, &pkg_url.sha256) {
-                    let _ = cache.link_to_project(&pkg_url.filename, &pkg_url.sha256, packages_dir);
+                    if let Err(e) = cache.link_to_project(&pkg_url.filename, &pkg_url.sha256, packages_dir) {
+                        ux::print_warning(format!("Cache link failed for {}: {e}", node.name));
+                    }
                 }
 
                 pb.set_message(format!("Installing: {}", node.name));
                 if pkg_url.filename.to_lowercase().ends_with(".whl") {
-                    let _ = package::extract_wheel(&dest_path, site_packages);
+                    package::extract_wheel(&dest_path, site_packages)?;
                 } else {
-                    let _ = package::extract_targz(&dest_path, site_packages);
+                    package::extract_targz(&dest_path, site_packages)?;
                 }
                 installed_count += 1;
             }
@@ -360,10 +386,13 @@ fn prune_unused_packages(site_packages: &Path, lockfile: &Lockfile, multi: &Mult
                 .keys()
                 .any(|k| k.to_lowercase().replace('-', "_") == pkg_base_name)
             {
-                if path.is_dir() {
-                    let _ = std::fs::remove_dir_all(&path);
+                let remove_result = if path.is_dir() {
+                    std::fs::remove_dir_all(&path)
                 } else {
-                    let _ = std::fs::remove_file(&path);
+                    std::fs::remove_file(&path)
+                };
+                if let Err(e) = remove_result {
+                    pb.println(format!("\x1b[33m⚠ Warning:\x1b[0m Could not prune {name}: {e}"));
                 }
             }
         }
