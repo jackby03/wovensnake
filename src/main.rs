@@ -62,7 +62,7 @@ enum Commands {
         #[arg(long)]
         python: bool,
     },
-    /// Uninstall WovenSnake from this machine
+    /// Uninstall `WovenSnake` from this machine
     #[command(name = "self-uninstall")]
     SelfUninstall {
         /// Skip confirmation prompt
@@ -100,8 +100,7 @@ async fn main() {
                 for pkg in &packages {
                     let (name, version) = pkg
                         .split_once("==")
-                        .map(|(n, v)| (n.to_string(), Some(v.to_string())))
-                        .unwrap_or_else(|| (pkg.clone(), None));
+                        .map_or_else(|| (pkg.clone(), None), |(n, v)| (n.to_string(), Some(v.to_string())));
                     if let Err(e) = cli::add::execute(&name, version).await {
                         ux::print_error(format!("Failed to add '{name}': {e}"));
                         break;
