@@ -261,7 +261,9 @@ async fn install_from_lock(
                     if is_wheel {
                         if let Some(dist_info) = find_dist_info(&site_packages, &name) {
                             if let Err(e) = package::generate_scripts(&dist_info, &scripts_dir, &python_version) {
-                                pb.println(format!("\x1b[33m⚠ Warning:\x1b[0m {name}: script generation failed ({e})"));
+                                pb.println(format!(
+                                    "\x1b[33m⚠ Warning:\x1b[0m {name}: script generation failed ({e})"
+                                ));
                             }
                         }
                     }
@@ -360,9 +362,7 @@ async fn resolve_and_install_final(
                 }
                 if is_wheel {
                     if let Some(dist_info) = find_dist_info(site_packages, &node.name) {
-                        if let Err(e) =
-                            package::generate_scripts(&dist_info, scripts_dir, &config.python_version)
-                        {
+                        if let Err(e) = package::generate_scripts(&dist_info, scripts_dir, &config.python_version) {
                             ux::print_warning(format!("Script generation failed for {}: {e}", node.name));
                         }
                     }
@@ -381,10 +381,14 @@ async fn resolve_and_install_final(
 /// Only wheels produce a `.dist-info` dir; sdists do not.
 fn find_dist_info(site_packages: &Path, name: &str) -> Option<std::path::PathBuf> {
     let normalized = name.to_lowercase().replace('-', "_");
-    std::fs::read_dir(site_packages).ok()?.filter_map(|e| e.ok()).find(|e| {
-        let fname = e.file_name().to_string_lossy().to_lowercase().replace('-', "_");
-        fname.starts_with(&normalized) && fname.ends_with(".dist-info")
-    }).map(|e| e.path())
+    std::fs::read_dir(site_packages)
+        .ok()?
+        .filter_map(|e| e.ok())
+        .find(|e| {
+            let fname = e.file_name().to_string_lossy().to_lowercase().replace('-', "_");
+            fname.starts_with(&normalized) && fname.ends_with(".dist-info")
+        })
+        .map(|e| e.path())
 }
 
 fn prune_unused_packages(site_packages: &Path, lockfile: &Lockfile, multi: &MultiProgress) {
