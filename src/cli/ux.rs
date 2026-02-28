@@ -25,8 +25,11 @@ pub fn print_header(msg: &str) {
 
 pub fn print_welcome() {
     use console::{style, Emoji, Style};
-    
-    println!("{}", style(r"
+
+    println!(
+        "{}",
+        style(
+            r"
    /$$      /$$                                         /$$$$$$                      /$$              
   | $$  /$ | $$                                        /$$__  $$                    | $$              
   | $$ /$$$| $$ /$$$$$$  /$$    /$$ /$$$$$$  /$$$$$$$ | $$  \__/ /$$$$$$$   /$$$$$$ | $$ /$$  /$$$$$$ 
@@ -35,12 +38,20 @@ pub fn print_welcome() {
   | $$$/ \  $$$| $$  | $$  \  $$/  | $$_____/| $$  | $$ /$$  \ $$| $$  | $$ /$$__  $$| $$  $$ | $$_____/
   | $$/   \  $$|  $$$$$$/   \  $/   |  $$$$$$$| $$  | $$|  $$$$$$/| $$  | $$|  $$$$$$$| $$ \  $$|  $$$$$$$
   |__/     \__/ \______/     \_/     \_______/|__/  |__/ \______/ |__/  |__/ \_______/|__/  \__/ \_______/
-    ").green().bold());
-    
-    println!("                {} {} {}", 
+    "
+        )
+        .green()
+        .bold()
+    );
+
+    println!(
+        "                {} {} {}",
         Emoji("🐍", ""),
         style("WovenSnake Package Manager").cyan().bold(),
         style(format!("v{}", env!("CARGO_PKG_VERSION"))).dim()
     );
-    println!("                {}\n", Style::new().italic().dim().apply_to("Dependencies, neatly woven."));
+    println!(
+        "                {}\n",
+        Style::new().italic().dim().apply_to("Dependencies, neatly woven.")
+    );
 }

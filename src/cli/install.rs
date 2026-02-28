@@ -207,9 +207,7 @@ async fn install_from_lock(
                 );
                 pb.set_message(format!("Syncing: {name}"));
 
-                if let Some(artifact) =
-                    select_artifact(&pkg.artifacts, current_platform())
-                {
+                if let Some(artifact) = select_artifact(&pkg.artifacts, current_platform()) {
                     let dest_path = packages_dir.join(&artifact.filename);
                     if cache.contains(&artifact.filename, &artifact.sha256) {
                         let _ = cache.link_to_project(&artifact.filename, &artifact.sha256, &packages_dir);
@@ -377,8 +375,14 @@ mod tests {
 
     #[test]
     fn test_platform_from_filename_windows() {
-        assert_eq!(platform_from_filename("numpy-1.24.0-cp311-cp311-win_amd64.whl"), "win_amd64");
-        assert_eq!(platform_from_filename("numpy-1.24.0-cp311-cp311-win32.whl"), "win_amd64");
+        assert_eq!(
+            platform_from_filename("numpy-1.24.0-cp311-cp311-win_amd64.whl"),
+            "win_amd64"
+        );
+        assert_eq!(
+            platform_from_filename("numpy-1.24.0-cp311-cp311-win32.whl"),
+            "win_amd64"
+        );
     }
 
     #[test]
@@ -411,14 +415,8 @@ mod tests {
 
     #[test]
     fn test_platform_from_filename_universal() {
-        assert_eq!(
-            platform_from_filename("requests-2.28.0-py3-none-any.whl"),
-            "any"
-        );
-        assert_eq!(
-            platform_from_filename("six-1.16.0-py2.py3-none-any.whl"),
-            "any"
-        );
+        assert_eq!(platform_from_filename("requests-2.28.0-py3-none-any.whl"), "any");
+        assert_eq!(platform_from_filename("six-1.16.0-py2.py3-none-any.whl"), "any");
     }
 
     #[test]
@@ -429,7 +427,13 @@ mod tests {
     #[test]
     fn test_current_platform_is_valid() {
         let platform = current_platform();
-        let valid = ["win_amd64", "macosx_arm64", "macosx_x86_64", "manylinux", "manylinux_aarch64"];
+        let valid = [
+            "win_amd64",
+            "macosx_arm64",
+            "macosx_x86_64",
+            "manylinux",
+            "manylinux_aarch64",
+        ];
         assert!(valid.contains(&platform), "unexpected platform: {platform}");
     }
 }

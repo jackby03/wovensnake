@@ -14,7 +14,7 @@ pub fn execute(non_interactive: bool) -> Result<(), Box<dyn std::error::Error>> 
     if path.exists() {
         ux::print_warning("wovenpkg.json already exists in this directory.");
         if non_interactive {
-             return Ok(());
+            return Ok(());
         }
         if !Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt("Do you want to overwrite it?")
@@ -31,9 +31,8 @@ pub fn execute(non_interactive: bool) -> Result<(), Box<dyn std::error::Error>> 
         .and_then(|n| n.to_str())
         .unwrap_or("my-project")
         .to_string();
-    
-    let system_version = python::get_system_python_version().unwrap_or_else(|| "3.12".to_string());
 
+    let system_version = python::get_system_python_version().unwrap_or_else(|| "3.12".to_string());
 
     // Interactive Flow
     let (name, python_version, virtual_environment) = if non_interactive {
@@ -47,13 +46,7 @@ pub fn execute(non_interactive: bool) -> Result<(), Box<dyn std::error::Error>> 
 
         // 2. Python Version
         let system_option = format!("System ({})", system_version);
-        let versions = vec![
-            system_option.as_str(),
-            "3.12",
-            "3.11",
-            "3.10",
-            "Manual Path",
-        ];
+        let versions = vec![system_option.as_str(), "3.12", "3.11", "3.10", "Manual Path"];
 
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Select Python Version")
@@ -70,10 +63,7 @@ pub fn execute(non_interactive: bool) -> Result<(), Box<dyn std::error::Error>> 
         };
 
         // 3. Virtual Environment
-        let venv_options = vec![
-            "In-Project (.venv)",
-            "Centralized (~/.wovensnake/venvs/...)",
-        ];
+        let venv_options = vec!["In-Project (.venv)", "Centralized (~/.wovensnake/venvs/...)"];
         let venv_selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Virtual Environment Location")
             .default(0)
@@ -85,12 +75,11 @@ pub fn execute(non_interactive: bool) -> Result<(), Box<dyn std::error::Error>> 
         } else {
             println!(
                 "{}",
-                style("Note: Centralized venvs are partially supported. Defaulting to local config for now.")
-                    .yellow()
+                style("Note: Centralized venvs are partially supported. Defaulting to local config for now.").yellow()
             );
             ".venv".to_string()
         };
-        
+
         (name, py_ver, venv)
     };
 

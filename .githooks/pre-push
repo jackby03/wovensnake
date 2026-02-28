@@ -1,0 +1,17 @@
+#!/bin/sh
+# Pre-push hook: runs before every `git push`.
+# Blocks the push if code is not properly formatted.
+#
+# To activate: git config core.hooksPath .githooks
+# To skip once: git push --no-verify
+
+set -e
+
+echo "Running cargo fmt check..."
+if ! cargo fmt -- --check; then
+    echo ""
+    echo "  Formatting errors found. Run 'cargo fmt' to fix them, then re-push."
+    exit 1
+fi
+
+echo "Format check passed."
