@@ -46,7 +46,7 @@ pub async fn fetch_package_info(name: &str, version: Option<&str>) -> Result<Pyp
         |v| format!("https://pypi.org/pypi/{name}/{v}/json"),
     );
 
-    let response = reqwest::get(url).await?;
+    let response = crate::core::http::CLIENT.get(url).send().await?;
 
     if response.status().is_success() {
         let info: PypiPackageInfo = response.json().await?;
@@ -58,7 +58,7 @@ pub async fn fetch_package_info(name: &str, version: Option<&str>) -> Result<Pyp
 
 pub async fn fetch_full_package_info(name: &str) -> Result<PypiFullInfo, Box<dyn Error>> {
     let url = format!("https://pypi.org/pypi/{name}/json");
-    let response = reqwest::get(url).await?;
+    let response = crate::core::http::CLIENT.get(url).send().await?;
     if response.status().is_success() {
         let info: PypiFullInfo = response.json().await?;
         Ok(info)
@@ -68,7 +68,7 @@ pub async fn fetch_full_package_info(name: &str) -> Result<PypiFullInfo, Box<dyn
 }
 
 pub async fn download_package(url: &str, dest_path: &Path) -> Result<(), Box<dyn Error>> {
-    let response = reqwest::get(url).await?;
+    let response = crate::core::http::CLIENT.get(url).send().await?;
     let content = response.bytes().await?;
     fs::write(dest_path, content)?;
     Ok(())

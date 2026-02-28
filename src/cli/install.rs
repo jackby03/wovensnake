@@ -217,7 +217,7 @@ async fn install_from_lock(
                             pb.println(format!("\x1b[33m⚠ Warning:\x1b[0m {name}: cache link failed ({e})"));
                         }
                     } else if !dest_path.exists() {
-                        let res = match reqwest::get(&artifact.url).await {
+                        let res = match crate::core::http::CLIENT.get(&artifact.url).send().await {
                             Ok(r) => r,
                             Err(e) => {
                                 pb.finish_with_message(format!("\x1b[31m✗\x1b[0m {name}: request failed ({e})"));
