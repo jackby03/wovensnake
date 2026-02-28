@@ -28,11 +28,11 @@ concurrency:
 
 jobs:
   # --------------------------------------------------------------------------
-  # 1. QUALITY GATES (Linting & Formatting)
+  # 1. QUALITY GATES — fmt and clippy are platform-independent, run once
   # --------------------------------------------------------------------------
   quality:
     name: Code Quality
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -49,12 +49,17 @@ jobs:
         run: cargo clippy -- -D warnings
 
   # --------------------------------------------------------------------------
-  # 2. TEST SUITE (Windows-only for v0.2.x)
+  # 2. TEST SUITE — cross-platform matrix (Linux, Windows, macOS)
   # --------------------------------------------------------------------------
   test:
-    name: Test Suite (Windows)
+    name: Test Suite (${{ matrix.os }})
     needs: quality
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false   # report all platforms even if one fails
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
     steps:
       - uses: actions/checkout@v4
 
