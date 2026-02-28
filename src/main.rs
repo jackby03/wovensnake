@@ -13,7 +13,7 @@ use wovensnake::cli;
 use wovensnake::cli::ux;
 
 #[derive(Parser)]
-#[command(name = "woven")]
+#[command(name = "woven", version)]
 #[command(about = "A Python package manager built with Rust", long_about = None)]
 struct Cli {
     #[command(subcommand)]
