@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.6] - 2026-03-01
+
+### Changed
+- **HTTP client reuse**: WovenSnake now reuses a single shared `reqwest::Client` across requests, reducing connection setup overhead and improving install/resolution performance.
+- **Dependency cleanup**: removed unused crates (`toml`, `pep440`, `mockito`) from `Cargo.toml` to reduce build surface and maintenance risk.
+
+### Fixed
+- **Artifact selection on Linux aarch64**: removed the invalid fallback from `manylinux_aarch64` to `x86_64`, preventing incompatible wheel installs on ARM64 systems.
+- **Windows wheel platform mapping**: `win32` wheels are now mapped correctly to the `win32` platform tag.
+- **Resolver efficiency**: eliminated duplicate PyPI metadata fetches per package during dependency resolution.
+- **Wheel install behavior**: console scripts from wheel `entry_points` are now generated after installation.
+- **Source distribution extraction**: `.tar.gz` extraction now strips the sdist top-level directory correctly.
+- **CLI and stability**: enabled `woven --version`, improved install pipeline error propagation, and resolved clippy/rustfmt issues that were affecting CI reliability.
+
 ## [0.3.5] - 2026-02-20
 
 ### Changed
