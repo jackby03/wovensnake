@@ -445,10 +445,7 @@ mod tests {
             platform_from_filename("numpy-1.24.0-cp311-cp311-win_amd64.whl"),
             "win_amd64"
         );
-        assert_eq!(
-            platform_from_filename("numpy-1.24.0-cp311-cp311-win32.whl"),
-            "win32"
-        );
+        assert_eq!(platform_from_filename("numpy-1.24.0-cp311-cp311-win32.whl"), "win32");
     }
 
     #[test]
