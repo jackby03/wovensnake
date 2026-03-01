@@ -32,8 +32,10 @@ const fn current_platform() -> &'static str {
 }
 
 fn platform_from_filename(filename: &str) -> String {
-    if filename.contains("win_amd64") || filename.contains("win32") {
+    if filename.contains("win_amd64") {
         "win_amd64".to_string()
+    } else if filename.contains("win32") {
+        "win32".to_string()
     } else if filename.contains("macosx") {
         if filename.contains("arm64") || filename.contains("aarch64") {
             "macosx_arm64".to_string()
@@ -443,10 +445,7 @@ mod tests {
             platform_from_filename("numpy-1.24.0-cp311-cp311-win_amd64.whl"),
             "win_amd64"
         );
-        assert_eq!(
-            platform_from_filename("numpy-1.24.0-cp311-cp311-win32.whl"),
-            "win_amd64"
-        );
+        assert_eq!(platform_from_filename("numpy-1.24.0-cp311-cp311-win32.whl"), "win32");
     }
 
     #[test]
