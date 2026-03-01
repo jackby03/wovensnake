@@ -6,22 +6,16 @@ pub fn select_artifact<'a>(artifacts: &'a [Artifact], platform: &str) -> Option<
         return Some(art);
     }
 
-    // 2. Platform-family fallback
-    match platform {
-        "macosx_arm64" => {
-            // Apple Silicon can run x86_64 wheels via Rosetta 2
-            if let Some(art) = artifacts.iter().find(|a| a.platform == "macosx_x86_64") {
-                return Some(art);
-            }
+    // 2. Platform-family fallback (only where binary compatibility is guaranteed)
+    if platform == "macosx_arm64" {
+        // Apple Silicon can run x86_64 wheels transparently via Rosetta 2
+        if let Some(art) = artifacts.iter().find(|a| a.platform == "macosx_x86_64") {
+            return Some(art);
         }
-        "manylinux_aarch64" => {
-            // Fall back to x86_64 manylinux (won't run natively, but handles the generic case)
-            if let Some(art) = artifacts.iter().find(|a| a.platform == "manylinux") {
-                return Some(art);
-            }
-        }
-        _ => {}
     }
+    // NOTE: manylinux_aarch64 does NOT fall back to manylinux (x86_64).
+    // An x86_64 wheel will not run on ARM64 Linux without emulation — installing
+    // it would silently produce a broken environment. Fall through to "any" or source.
 
     // 3. Universal wheel (py3-none-any, py2.py3-none-any, etc.)
     if let Some(art) = artifacts.iter().find(|a| a.platform == "any") {

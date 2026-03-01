@@ -73,12 +73,30 @@ fn test_select_artifact_falls_back_to_source() {
 }
 
 #[test]
-fn test_select_artifact_linux_aarch64_falls_back_to_manylinux() {
+fn test_select_artifact_linux_aarch64_prefers_any_over_x86_64() {
+    // x86_64 manylinux wheels are not compatible with ARM64 Linux.
+    // When only an x86_64 wheel and a universal wheel exist, the universal
+    // wheel must be selected — NOT the incompatible x86_64 binary.
     let artifacts = vec![
         make_artifact("manylinux", "pkg-1.0-cp311-cp311-manylinux_2_17_x86_64.whl"),
         make_artifact("any", "pkg-1.0-py3-none-any.whl"),
     ];
     let result = select_artifact(&artifacts, "manylinux_aarch64");
     assert!(result.is_some());
-    assert_eq!(result.unwrap().platform, "manylinux");
+    assert_eq!(result.unwrap().platform, "any");
+}
+
+#[test]
+fn test_select_artifact_linux_aarch64_no_fallback_to_x86_64_when_no_any() {
+    // When only an incompatible x86_64 wheel exists and no universal wheel,
+    // select_artifact must return None rather than silently install a broken package.
+    let artifacts = vec![make_artifact(
+        "manylinux",
+        "pkg-1.0-cp311-cp311-manylinux_2_17_x86_64.whl",
+    )];
+    let result = select_artifact(&artifacts, "manylinux_aarch64");
+    assert!(
+        result.is_none(),
+        "should not select an incompatible x86_64 wheel on aarch64"
+    );
 }
