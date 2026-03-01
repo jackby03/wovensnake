@@ -20,7 +20,6 @@ tempfile = "3.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 reqwest = { version = "0.11", default-features = false, features = ["json", "stream", "rustls-tls"] }
-toml = "0.5"
 log = "0.4"
 clap = { version = "4.5.53", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
@@ -29,7 +28,6 @@ indicatif = "0.18.3"
 futures = "0.3.31"
 flate2 = "1.1.5"
 tar = "0.4.44"
-pep440 = "0.2.0"
 pep508_rs = "0.9.2"
 sha2 = "0.10.9"
 dirs = "6.0.0"
@@ -39,7 +37,6 @@ console = "0.16.2"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["full"] }
-mockito = "0.31"
 
 [build-dependencies]
 
