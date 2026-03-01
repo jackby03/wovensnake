@@ -95,5 +95,8 @@ fn test_select_artifact_linux_aarch64_no_fallback_to_x86_64_when_no_any() {
         "pkg-1.0-cp311-cp311-manylinux_2_17_x86_64.whl",
     )];
     let result = select_artifact(&artifacts, "manylinux_aarch64");
-    assert!(result.is_none(), "should not select an incompatible x86_64 wheel on aarch64");
+    assert!(
+        result.is_none(),
+        "should not select an incompatible x86_64 wheel on aarch64"
+    );
 }
