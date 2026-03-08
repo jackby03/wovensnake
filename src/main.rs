@@ -98,11 +98,8 @@ async fn main() {
             } else {
                 // woven install requests flask==3.0.0  →  add each package then install
                 for pkg in &packages {
-                    let (name, version) = pkg
-                        .split_once("==")
-                        .map_or_else(|| (pkg.clone(), None), |(n, v)| (n.to_string(), Some(v.to_string())));
-                    if let Err(e) = cli::add::execute(&name, version).await {
-                        ux::print_error(format!("Failed to add '{name}': {e}"));
+                    if let Err(e) = cli::add::execute(pkg, None).await {
+                        ux::print_error(format!("Failed to add '{pkg}': {e}"));
                         break;
                     }
                 }
