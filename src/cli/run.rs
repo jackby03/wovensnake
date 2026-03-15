@@ -120,9 +120,7 @@ mod tests {
         let args = vec!["../bin/malicious".to_string()];
 
         // Use a closure or explicit match to ensure we reset the directory even on panic
-        let result = std::panic::catch_unwind(|| {
-            execute(&args)
-        });
+        let result = std::panic::catch_unwind(|| execute(&args));
 
         // Reset current directory
         std::env::set_current_dir(&original_dir).unwrap();
@@ -130,9 +128,6 @@ mod tests {
         let result = result.unwrap();
 
         assert!(result.is_err());
-        assert_eq!(
-            result.unwrap_err().to_string(),
-            "Command name cannot contain slashes."
-        );
+        assert_eq!(result.unwrap_err().to_string(), "Command name cannot contain slashes.");
     }
 }
