@@ -35,6 +35,10 @@ pub fn execute(args: &[String]) -> Result<(), Box<dyn Error>> {
     let command_name = &args[0];
     let command_args = &args[1..];
 
+    if command_name.contains('/') || command_name.contains('\\') {
+        return Err("Command name cannot contain slashes.".into());
+    }
+
     // Check if command is in venv/Scripts (or bin)
     let scripts_dir = if cfg!(windows) {
         venv_base.join("Scripts")
@@ -52,7 +56,7 @@ pub fn execute(args: &[String]) -> Result<(), Box<dyn Error>> {
     } else if command_name == "python" || command_name == "python3" {
         python_path
     } else {
-        Path::new(command_name).to_path_buf()
+        return Err(format!("Command '{}' not found in virtual environment.", command_name).into());
     };
 
     // Construct command environment
@@ -76,4 +80,59 @@ pub fn execute(args: &[String]) -> Result<(), Box<dyn Error>> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use tempfile::tempdir;
+
+    #[test]
+    fn test_execute_prevents_command_injection_with_slashes() {
+        let dir = tempdir().unwrap();
+        let config_path = dir.path().join("wovenpkg.json");
+        fs::write(
+            &config_path,
+            r#"{"name": "test", "version": "0.1.0", "python_version": "3.10", "pythonVersion": "3.10", "virtual_environment": ".venv", "virtualEnvironment": ".venv", "dependencies": {}}"#,
+        )
+        .unwrap();
+
+        let venv_path = dir.path().join(".venv");
+        let bin_path = if cfg!(windows) {
+            venv_path.join("Scripts")
+        } else {
+            venv_path.join("bin")
+        };
+        fs::create_dir_all(&bin_path).unwrap();
+
+        let python_path = if cfg!(windows) {
+            bin_path.join("python.exe")
+        } else {
+            bin_path.join("python")
+        };
+        fs::write(&python_path, "").unwrap();
+
+        // Change current directory to temp dir so read_config finds wovenpkg.json
+        let original_dir = std::env::current_dir().unwrap();
+        std::env::set_current_dir(dir.path()).unwrap();
+
+        let args = vec!["../bin/malicious".to_string()];
+
+        // Use a closure or explicit match to ensure we reset the directory even on panic
+        let result = std::panic::catch_unwind(|| {
+            execute(&args)
+        });
+
+        // Reset current directory
+        std::env::set_current_dir(&original_dir).unwrap();
+
+        let result = result.unwrap();
+
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "Command name cannot contain slashes."
+        );
+    }
 }
