@@ -195,60 +195,60 @@ pub async fn resolve_and_install_final<S: std::hash::BuildHasher + Sync>(
 
     for (name_lower, node) in graph.packages {
         let mut artifacts: Vec<Artifact> = Vec::new();
-        for url in &node.urls {
+        for url in node.urls {
             if url.packagetype == "bdist_wheel" {
                 let platform = platform_from_filename(&url.filename);
                 artifacts.push(Artifact {
-                    url: url.url.clone(),
-                    filename: url.filename.clone(),
-                    sha256: url.digests.sha256.clone(),
+                    url: url.url,
+                    filename: url.filename,
+                    sha256: url.digests.sha256,
                     platform,
                 });
             } else if url.packagetype == "sdist" {
                 artifacts.push(Artifact {
-                    url: url.url.clone(),
-                    filename: url.filename.clone(),
-                    sha256: url.digests.sha256.clone(),
+                    url: url.url,
+                    filename: url.filename,
+                    sha256: url.digests.sha256,
                     platform: "source".to_string(),
                 });
             }
         }
 
+        let node_name = node.name;
         lockfile.packages.insert(
-            node.name.clone(),
+            node_name.clone(),
             LockedPackage {
-                version: node.version.clone(),
+                version: node.version,
                 artifacts: artifacts.clone(),
-                dependencies: node.dependencies.clone(),
+                dependencies: node.dependencies,
             },
         );
 
         if let Some(pkg_url) = select_artifact(&artifacts, current_platform()) {
-            if local_installed.insert(name_lower.clone()) {
+            if local_installed.insert(name_lower) {
                 let dest_path = packages_dir.join(&pkg_url.filename);
                 if !cache.contains(&pkg_url.filename, &pkg_url.sha256) && !dest_path.exists() {
-                    task.set_message(format!("Downloading: {}", node.name));
+                    task.set_message(format!("Downloading: {node_name}"));
                     package::download_package(&pkg_url.url, &dest_path).await?;
                     let data = tokio::fs::read(&dest_path).await?;
                     if let Err(e) = cache.save(&pkg_url.filename, &pkg_url.sha256, &data) {
-                        task.warning(format!("Cache save failed for {}: {e}", node.name));
+                        task.warning(format!("Cache save failed for {node_name}: {e}"));
                     }
                 } else if cache.contains(&pkg_url.filename, &pkg_url.sha256) {
                     if let Err(e) = cache.link_to_project(&pkg_url.filename, &pkg_url.sha256, packages_dir) {
-                        task.warning(format!("Cache link failed for {}: {e}", node.name));
+                        task.warning(format!("Cache link failed for {node_name}: {e}"));
                     }
                 }
 
-                task.set_message(format!("Installing: {}", node.name));
+                task.set_message(format!("Installing: {node_name}"));
                 let is_wheel = pkg_url.filename.to_lowercase().ends_with(".whl");
-                let dest_path_clone = dest_path.clone();
                 let site_packages_clone = site_packages.to_path_buf();
 
                 let ext_res = tokio::task::spawn_blocking(move || {
                     let res = if is_wheel {
-                        package::extract_wheel(&dest_path_clone, &site_packages_clone)
+                        package::extract_wheel(&dest_path, &site_packages_clone)
                     } else {
-                        package::extract_targz(&dest_path_clone, &site_packages_clone)
+                        package::extract_targz(&dest_path, &site_packages_clone)
                     };
                     res.map_err(|e| e.to_string())
                 })
@@ -256,12 +256,12 @@ pub async fn resolve_and_install_final<S: std::hash::BuildHasher + Sync>(
                 .unwrap_or_else(|e| Err(format!("Task joined failed: {e}")));
 
                 if let Err(e) = ext_res {
-                    task.warning(format!("Extract failed for {}: {e}", node.name));
+                    task.warning(format!("Extract failed for {node_name}: {e}"));
                 }
                 if is_wheel {
-                    if let Some(dist_info) = find_dist_info(site_packages, &node.name) {
+                    if let Some(dist_info) = find_dist_info(site_packages, &node_name) {
                         if let Err(e) = package::generate_scripts(&dist_info, scripts_dir, &config.python_version) {
-                            task.warning(format!("Script generation failed for {}: {e}", node.name));
+                            task.warning(format!("Script generation failed for {node_name}: {e}"));
                         }
                     }
                 }

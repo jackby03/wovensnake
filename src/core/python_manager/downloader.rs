@@ -272,11 +272,11 @@ fn load_cached_assets(version: &str, platform: &str) -> Result<Vec<String>, crat
     }
 
     let content = fs::read_to_string(path)?;
-    let cache: serde_json::Value = serde_json::from_str(&content)?;
+    let mut cache: serde_json::Map<String, serde_json::Value> = serde_json::from_str(&content)?;
 
     let key = format!("{}-{}", version, platform);
-    if let Some(urls) = cache.get(&key) {
-        let urls: Vec<String> = serde_json::from_value(urls.clone())?;
+    if let Some(urls) = cache.remove(&key) {
+        let urls: Vec<String> = serde_json::from_value(urls)?;
         return Ok(urls);
     }
 
