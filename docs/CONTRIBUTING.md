@@ -97,7 +97,7 @@ All pull requests must pass the quality gates enforced by CI before merging.
 
 ### Formatting
 
-WovenSnake uses [`rustfmt`](https://github.com/rust-lang/rustfmt) with a project-level configuration in [`.rustfmt.toml`](.rustfmt.toml) (`max_width = 120`, Unix newlines). Run the formatter before committing:
+WovenSnake uses [`rustfmt`](https://github.com/rust-lang/rustfmt) with a project-level configuration in [`.rustfmt.toml`](../.rustfmt.toml) (`max_width = 120`, Unix newlines). Run the formatter before committing:
 
 ```bash
 cargo fmt
@@ -117,7 +117,7 @@ cargo fmt -- --check
 cargo clippy -- -D warnings
 ```
 
-Project-level Clippy settings live in [`clippy.toml`](clippy.toml).
+Project-level Clippy settings live in [`clippy.toml`](../clippy.toml).
 
 ---
 

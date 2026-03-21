@@ -1,5 +1,5 @@
 <div align="center">
-  <img src=".github/assets/logo.png" alt="WovenSnake Cozy Logo" width="500">
+  <img src="../.github/assets/logo.png" alt="WovenSnake Cozy Logo" width="500">
   <h1>🧶 WovenSnake</h1>
 </div>
 
