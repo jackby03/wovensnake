@@ -70,7 +70,7 @@ pub async fn fetch_full_package_info(name: &str) -> Result<PypiFullInfo, Box<dyn
 pub async fn download_package(url: &str, dest_path: &Path) -> Result<(), Box<dyn Error>> {
     let response = crate::core::http::CLIENT.get(url).send().await?;
     let content = response.bytes().await?;
-    fs::write(dest_path, content)?;
+    tokio::fs::write(dest_path, content).await?;
     Ok(())
 }
 
