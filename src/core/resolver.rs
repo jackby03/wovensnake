@@ -67,8 +67,7 @@ pub async fn resolve(
             }
         });
         let info = package::fetch_package_info(&name, fetch_version).await?;
-        let resolved_version = info.info.version.clone();
-
+        // The info object is consumed directly below
         let mut sub_deps = Vec::new();
 
         if let Some(requires_dist) = info.info.requires_dist {
@@ -92,7 +91,7 @@ pub async fn resolve(
             name_lower,
             ResolutionNode {
                 name: info.info.name,
-                version: resolved_version,
+                version: info.info.version,
                 dependencies: sub_deps,
                 urls: info.urls,
             },
