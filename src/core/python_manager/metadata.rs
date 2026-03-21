@@ -1,7 +1,6 @@
 use once_cell::sync::OnceCell;
 use serde::Deserialize;
 use std::env;
-use std::error::Error;
 use std::fs;
 
 #[derive(Deserialize, Debug)]
@@ -19,11 +18,11 @@ const EMBEDDED_PYTHON_METADATA: &str = include_str!("../../../scripts/data/pytho
 const PYTHON_METADATA_ENV: &str = "WOVENSNAKE_PYTHON_ASSETS_JSON";
 static METADATA_CACHE: OnceCell<Vec<MetadataAsset>> = OnceCell::new();
 
-pub fn get_metadata_entries() -> Result<&'static Vec<MetadataAsset>, Box<dyn Error>> {
+pub fn get_metadata_entries() -> Result<&'static Vec<MetadataAsset>, crate::core::error::WovenError> {
     METADATA_CACHE.get_or_try_init(load_metadata_entries)
 }
 
-fn load_metadata_entries() -> Result<Vec<MetadataAsset>, Box<dyn Error>> {
+fn load_metadata_entries() -> Result<Vec<MetadataAsset>, crate::core::error::WovenError> {
     if let Ok(path) = env::var(PYTHON_METADATA_ENV) {
         let content = fs::read_to_string(path)?;
         let parsed: Vec<MetadataAsset> = serde_json::from_str(&content)?;
@@ -33,7 +32,10 @@ fn load_metadata_entries() -> Result<Vec<MetadataAsset>, Box<dyn Error>> {
     Ok(parsed)
 }
 
-pub fn resolve_from_metadata(version: &str, platform_key: &str) -> Result<Option<Vec<String>>, Box<dyn Error>> {
+pub fn resolve_from_metadata(
+    version: &str,
+    platform_key: &str,
+) -> Result<Option<Vec<String>>, crate::core::error::WovenError> {
     let entries = get_metadata_entries()?;
     let mut matches = Vec::new();
     for asset in entries {

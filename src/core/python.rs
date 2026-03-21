@@ -1,17 +1,16 @@
-use std::error::Error;
 use std::process::Command;
 
 /// Validates that the system Python version matches the expected version.
 /// Expected version should be in format "3.10", "3.11", etc.
 /// If not found in system, it tries to use the managed Python versions.
-pub async fn validate_python_version(expected: &str) -> Result<(), Box<dyn Error>> {
+pub async fn validate_python_version(expected: &str) -> Result<(), crate::core::error::WovenError> {
     find_python_executable(expected).await?;
     Ok(())
 }
 
 /// Finds a Python executable that matches the expected version.
 /// Tries system PATH first, then managed versions.
-pub async fn find_python_executable(expected: &str) -> Result<String, Box<dyn Error>> {
+pub async fn find_python_executable(expected: &str) -> Result<String, crate::core::error::WovenError> {
     // Try specific version first, then 'python', then 'python3'
     let commands = [
         format!("python{}", expected),

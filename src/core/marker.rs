@@ -1,7 +1,6 @@
 use pep508_rs::marker::{MarkerEnvironment, MarkerEnvironmentBuilder};
 use pep508_rs::{Requirement, VerbatimUrl};
 use std::env;
-use std::error::Error;
 use std::str::FromStr;
 
 /// Build the current environment context for marker evaluation.
@@ -9,7 +8,7 @@ use std::str::FromStr;
 /// Constructs a `MarkerEnvironment` that represents the current platform,
 /// Python version, and implementation details. This is used to evaluate
 /// PEP 508 environment markers on dependency strings.
-pub fn build_marker_environment(python_version: &str) -> Result<MarkerEnvironment, Box<dyn Error>> {
+pub fn build_marker_environment(python_version: &str) -> Result<MarkerEnvironment, crate::core::error::WovenError> {
     let os_name = if cfg!(windows) { "nt" } else { "posix" };
 
     let sys_platform = if cfg!(windows) {

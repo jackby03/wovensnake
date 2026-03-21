@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::fs;
 use std::str::FromStr;
 
@@ -47,14 +46,16 @@ fn fetch_version_for_spec(specifier: Option<&str>) -> Option<String> {
     }
 }
 
-fn parse_add_request(input: &str) -> Result<AddRequest, Box<dyn Error>> {
+fn parse_add_request(input: &str) -> anyhow::Result<AddRequest> {
     let req = Requirement::<VerbatimUrl>::from_str(input)
-        .map_err(|e| format!("Invalid dependency expression '{input}': {e}"))?;
+        .map_err(|e| anyhow::anyhow!("Invalid dependency expression '{input}': {e}"))?;
 
     let requested_specifier = match req.version_or_url {
         Some(VersionOrUrl::VersionSpecifier(spec)) => Some(spec.to_string()),
         Some(VersionOrUrl::Url(_)) => {
-            return Err("URL requirements are not yet supported by `woven add`.".into());
+            return Err(anyhow::anyhow!(
+                "URL requirements are not yet supported by `woven add`."
+            ));
         }
         None => None,
     };
@@ -70,21 +71,20 @@ fn ensure_resolved_matches_constraint(
     package_name: &str,
     constraint: &str,
     resolved_version: &str,
-) -> Result<(), Box<dyn Error>> {
+) -> anyhow::Result<()> {
     let specifiers = VersionSpecifiers::from_str(constraint)?;
     let resolved = Version::from_str(resolved_version)?;
 
     if specifiers.contains(&resolved) {
         Ok(())
     } else {
-        Err(
-            format!("Resolved version {resolved_version} for {package_name} does not satisfy constraint {constraint}")
-                .into(),
-        )
+        Err(anyhow::anyhow!(
+            "Resolved version {resolved_version} for {package_name} does not satisfy constraint {constraint}"
+        ))
     }
 }
 
-pub async fn execute(name: &str, version: Option<String>) -> Result<(), Box<dyn Error>> {
+pub async fn execute(name: &str, version: Option<String>) -> anyhow::Result<()> {
     let requirement_input = build_requirement_input(name, version.as_deref());
     let request = parse_add_request(&requirement_input)?;
 

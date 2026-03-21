@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::error::Error;
 use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
@@ -55,7 +54,7 @@ fn platform_from_filename(filename: &str) -> String {
     }
 }
 
-pub async fn execute(force_resolve: bool) -> Result<(), Box<dyn Error>> {
+pub async fn execute(force_resolve: bool) -> anyhow::Result<()> {
     let config = config::read_config("wovenpkg.json")?;
 
     let lock_path = Path::new("wovenpkg.lock");
@@ -180,7 +179,7 @@ async fn install_from_lock(
     site_packages: &Path,
     scripts_dir: &Path,
     multi: &MultiProgress,
-) -> Result<usize, Box<dyn Error>> {
+) -> anyhow::Result<usize> {
     let packages_to_install: Vec<_> = lockfile
         .packages
         .iter()
@@ -297,7 +296,7 @@ async fn resolve_and_install_final(
     scripts_dir: &Path,
     multi: &MultiProgress,
     lock_path: &Path,
-) -> Result<usize, Box<dyn Error>> {
+) -> anyhow::Result<usize> {
     let mut lockfile = Lockfile::new(&config.name, &config.version, &config.python_version);
     let mut local_installed = installed_project.clone();
 

@@ -1,11 +1,10 @@
-use std::error::Error;
 use std::fs;
 
 use crate::cli::install;
 use crate::cli::ux;
 use crate::core::config;
 
-pub async fn execute(package_name: &str) -> Result<(), Box<dyn Error>> {
+pub async fn execute(package_name: &str) -> anyhow::Result<()> {
     ux::print_header(&format!("Removing package {package_name}"));
 
     let config_path = "wovenpkg.json";

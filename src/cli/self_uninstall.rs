@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::fs;
 use std::io::{self, Write};
 use std::path::PathBuf;
@@ -9,7 +8,7 @@ use crate::cli::ux;
 #[cfg(unix)]
 const RC_FILES: &[&str] = &[".bashrc", ".zshrc", ".profile", ".bash_profile"];
 
-pub fn execute(yes: bool) -> Result<(), Box<dyn Error>> {
+pub fn execute(yes: bool) -> anyhow::Result<()> {
     ux::print_header("Uninstalling WovenSnake...");
 
     // ── 1. Locate the running binary ──────────────────────────────────────────
@@ -51,7 +50,7 @@ pub fn execute(yes: bool) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn confirm(prompt: &str) -> Result<bool, Box<dyn Error>> {
+fn confirm(prompt: &str) -> anyhow::Result<bool> {
     print!("  {} [y/N] ", prompt);
     io::stdout().flush()?;
     let mut line = String::new();
@@ -59,7 +58,7 @@ fn confirm(prompt: &str) -> Result<bool, Box<dyn Error>> {
     Ok(matches!(line.trim().to_lowercase().as_str(), "y" | "yes"))
 }
 
-fn remove_binary(path: &PathBuf) -> Result<(), Box<dyn Error>> {
+fn remove_binary(path: &PathBuf) -> anyhow::Result<()> {
     #[cfg(unix)]
     {
         fs::remove_file(path)?;

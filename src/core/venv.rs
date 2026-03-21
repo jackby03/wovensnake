@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::path::Path;
 use std::process::Command;
 
@@ -6,7 +5,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::core::python;
 
-pub async fn create_venv(path: &Path, python_version: &str) -> Result<(), Box<dyn Error>> {
+pub async fn create_venv(path: &Path, python_version: &str) -> Result<(), crate::core::error::WovenError> {
     let pb = ProgressBar::new_spinner();
     pb.set_style(
         ProgressStyle::default_spinner()
@@ -45,7 +44,7 @@ pub async fn create_venv(path: &Path, python_version: &str) -> Result<(), Box<dy
 }
 
 /// Gets the Python version of an existing virtual environment.
-pub fn get_venv_python_version(path: &Path) -> Result<String, Box<dyn Error>> {
+pub fn get_venv_python_version(path: &Path) -> Result<String, crate::core::error::WovenError> {
     let python_exe = if cfg!(windows) {
         path.join("Scripts").join("python.exe")
     } else {

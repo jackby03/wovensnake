@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::error::Error;
 use std::fs;
 use std::path::Path;
 
@@ -39,13 +38,13 @@ impl Lockfile {
         }
     }
 
-    pub fn write(&self, path: &Path) -> Result<(), Box<dyn Error>> {
+    pub fn write(&self, path: &Path) -> Result<(), crate::core::error::WovenError> {
         let json = serde_json::to_string_pretty(self)?;
         fs::write(path, json)?;
         Ok(())
     }
 
-    pub fn read(path: &Path) -> Result<Self, Box<dyn Error>> {
+    pub fn read(path: &Path) -> Result<Self, crate::core::error::WovenError> {
         let content = fs::read_to_string(path)?;
         let lockfile: Self = serde_json::from_str(&content)?;
         Ok(lockfile)

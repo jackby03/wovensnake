@@ -1,10 +1,8 @@
-use std::error::Error;
-
 use crate::cli::ux;
 use crate::core::config;
 use crate::dependencies::package;
 
-pub async fn execute() -> Result<(), Box<dyn Error>> {
+pub async fn execute() -> anyhow::Result<()> {
     let mut config = config::read_config("wovenpkg.json")?;
     ux::print_header(&format!("Updating dependencies for {}", config.name));
 

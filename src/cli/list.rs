@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::path::Path;
 
 use crate::cli::ux;
@@ -6,7 +5,7 @@ use crate::core::config;
 use crate::core::lock::Lockfile;
 use crate::core::python_manager;
 
-pub fn execute() -> Result<(), Box<dyn Error>> {
+pub fn execute() -> anyhow::Result<()> {
     let config = config::read_config("wovenpkg.json")?;
     ux::print_header(&format!("Project: {} v{}", config.name, config.version));
     println!(" \x1b[36mPython Version:\x1b[0m {}", config.python_version);
