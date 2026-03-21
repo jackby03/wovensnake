@@ -1,0 +1,5 @@
+version: "1.0"
+project:
+  name: "wovensnake"
+  description: "A fast Python version manager and virtual environment tool written in Rust."
+  language: rust
