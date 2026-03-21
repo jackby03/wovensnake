@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
-pub fn execute(non_interactive: bool) -> Result<(), Box<dyn std::error::Error>> {
+pub fn execute(non_interactive: bool) -> anyhow::Result<()> {
     ux::print_header("Initializing Project");
     let path = Path::new("wovenpkg.json");
 

@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::fs;
 use std::path::Path;
 
@@ -7,7 +6,7 @@ use crate::core::cache::Cache;
 use crate::core::config;
 use crate::core::python_manager;
 
-pub fn execute(all: bool, python: bool) -> Result<(), Box<dyn Error>> {
+pub fn execute(all: bool, python: bool) -> anyhow::Result<()> {
     ux::print_header("Cleaning project environment...");
 
     // 1. Read config to find venv

@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -12,7 +11,7 @@ impl Cache {
         Self { base_dir }
     }
 
-    pub fn init() -> Result<Self, Box<dyn Error>> {
+    pub fn init() -> Result<Self, crate::core::error::WovenError> {
         let home = dirs::home_dir().ok_or("Could not find home directory")?;
         let cache_dir = home.join(".wovensnake").join("cache");
 
@@ -37,7 +36,7 @@ impl Cache {
         filename: &str,
         sha256: &str,
         project_packages_dir: &Path,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), crate::core::error::WovenError> {
         let cache_path = self.get_pkg_path(filename, sha256);
         let dest_path = project_packages_dir.join(filename);
 
@@ -51,7 +50,7 @@ impl Cache {
         Ok(())
     }
 
-    pub fn save(&self, filename: &str, sha256: &str, data: &[u8]) -> Result<PathBuf, Box<dyn Error>> {
+    pub fn save(&self, filename: &str, sha256: &str, data: &[u8]) -> Result<PathBuf, crate::core::error::WovenError> {
         let pkg_dir = self.base_dir.join(sha256);
         if !pkg_dir.exists() {
             fs::create_dir_all(&pkg_dir)?;
@@ -62,7 +61,7 @@ impl Cache {
         Ok(pkg_path)
     }
 
-    pub fn clear(&self) -> Result<(), Box<dyn Error>> {
+    pub fn clear(&self) -> Result<(), crate::core::error::WovenError> {
         if self.base_dir.exists() {
             fs::remove_dir_all(&self.base_dir)?;
             fs::create_dir_all(&self.base_dir)?;

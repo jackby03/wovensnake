@@ -3,7 +3,6 @@ use futures::StreamExt;
 use indicatif::{ProgressBar, ProgressStyle};
 use serde::Deserialize;
 use std::env;
-use std::error::Error;
 use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -27,7 +26,7 @@ struct GithubAsset {
 
 const PYTHON_BUILD_STANDALONE_REPO: &str = "astral-sh/python-build-standalone";
 
-pub async fn download_and_extract_python(version: &str, dest: &Path) -> Result<(), Box<dyn Error>> {
+pub async fn download_and_extract_python(version: &str, dest: &Path) -> Result<(), crate::core::error::WovenError> {
     let urls = resolve_python_assets(version).await?;
     let mut response = None;
     let mut last_url = String::new();
@@ -87,7 +86,7 @@ pub async fn download_and_extract_python(version: &str, dest: &Path) -> Result<(
     Ok(())
 }
 
-fn apply_post_install_patches(dest: &Path, version: &str) -> Result<(), Box<dyn Error>> {
+fn apply_post_install_patches(dest: &Path, version: &str) -> Result<(), crate::core::error::WovenError> {
     // 1. Create EXTERNALLY-MANAGED file (PEP 668)
     // This prevents users from accidentally using pip to modify this managed python
     let install_dir = find_install_dir(dest).ok_or("Could not find install directory")?;
@@ -153,7 +152,7 @@ fn find_install_dir(base: &Path) -> Option<PathBuf> {
     None
 }
 
-async fn resolve_python_assets(version: &str) -> Result<Vec<String>, Box<dyn Error>> {
+async fn resolve_python_assets(version: &str) -> Result<Vec<String>, crate::core::error::WovenError> {
     let os = env::consts::OS;
     let arch = env::consts::ARCH;
 
@@ -257,7 +256,7 @@ async fn resolve_python_assets(version: &str) -> Result<Vec<String>, Box<dyn Err
     Ok(urls)
 }
 
-fn get_cache_path() -> Result<PathBuf, Box<dyn Error>> {
+fn get_cache_path() -> Result<PathBuf, crate::core::error::WovenError> {
     let home = dirs::home_dir().ok_or("Could not find home directory")?;
     let cache_dir = home.join(".woven").join("cache");
     if !cache_dir.exists() {
@@ -266,7 +265,7 @@ fn get_cache_path() -> Result<PathBuf, Box<dyn Error>> {
     Ok(cache_dir.join("python_assets.json"))
 }
 
-fn load_cached_assets(version: &str, platform: &str) -> Result<Vec<String>, Box<dyn Error>> {
+fn load_cached_assets(version: &str, platform: &str) -> Result<Vec<String>, crate::core::error::WovenError> {
     let path = get_cache_path()?;
     if !path.exists() {
         return Ok(vec![]);
@@ -284,7 +283,7 @@ fn load_cached_assets(version: &str, platform: &str) -> Result<Vec<String>, Box<
     Ok(vec![])
 }
 
-fn save_cached_assets(version: &str, platform: &str, urls: &[String]) -> Result<(), Box<dyn Error>> {
+fn save_cached_assets(version: &str, platform: &str, urls: &[String]) -> Result<(), crate::core::error::WovenError> {
     let path = get_cache_path()?;
     let mut cache: serde_json::Map<String, serde_json::Value> = if path.exists() {
         let content = fs::read_to_string(&path)?;
@@ -301,7 +300,7 @@ fn save_cached_assets(version: &str, platform: &str, urls: &[String]) -> Result<
     Ok(())
 }
 
-fn extract_archive(archive_path: &Path, dest: &Path, is_zip: bool) -> Result<(), Box<dyn Error>> {
+fn extract_archive(archive_path: &Path, dest: &Path, is_zip: bool) -> Result<(), crate::core::error::WovenError> {
     let file = fs::File::open(archive_path)?;
 
     if is_zip {

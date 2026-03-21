@@ -1,12 +1,11 @@
-use std::error::Error;
 use std::path::Path;
 use std::process::Command;
 
 use crate::core::config;
 
-pub fn execute(args: &[String]) -> Result<(), Box<dyn Error>> {
+pub fn execute(args: &[String]) -> anyhow::Result<()> {
     if args.is_empty() {
-        return Err("No command specified to run.".into());
+        return Err(anyhow::anyhow!("No command specified to run."));
     }
 
     let config = config::read_config("wovenpkg.json")?;
@@ -25,18 +24,17 @@ pub fn execute(args: &[String]) -> Result<(), Box<dyn Error>> {
     };
 
     if !python_path.exists() {
-        return Err(format!(
+        return Err(anyhow::anyhow!(
             "Virtual environment not found at {}. Run 'woven install' first.",
             venv_base.display()
-        )
-        .into());
+        ));
     }
 
     let command_name = &args[0];
     let command_args = &args[1..];
 
     if command_name.contains('/') || command_name.contains('\\') {
-        return Err("Command name cannot contain slashes.".into());
+        return Err(anyhow::anyhow!("Command name cannot contain slashes."));
     }
 
     // Check if command is in venv/Scripts (or bin)
@@ -56,7 +54,10 @@ pub fn execute(args: &[String]) -> Result<(), Box<dyn Error>> {
     } else if command_name == "python" || command_name == "python3" {
         python_path
     } else {
-        return Err(format!("Command '{}' not found in virtual environment.", command_name).into());
+        return Err(anyhow::anyhow!(
+            "Command '{}' not found in virtual environment.",
+            command_name
+        ));
     };
 
     // Construct command environment
@@ -75,7 +76,7 @@ pub fn execute(args: &[String]) -> Result<(), Box<dyn Error>> {
         if let Some(code) = status.code() {
             std::process::exit(code);
         } else {
-            return Err("Command terminated by signal".into());
+            return Err(anyhow::anyhow!("Command terminated by signal"));
         }
     }
 

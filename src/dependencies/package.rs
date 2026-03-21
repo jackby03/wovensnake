@@ -1,6 +1,5 @@
 use flate2::read::GzDecoder;
 use serde::{Deserialize, Serialize};
-use std::error::Error;
 use std::fs;
 use std::io;
 use std::path::Path;
@@ -40,7 +39,10 @@ pub struct PypiFullInfo {
     pub releases: std::collections::HashMap<String, Vec<PackageUrl>>,
 }
 
-pub async fn fetch_package_info(name: &str, version: Option<&str>) -> Result<PypiPackageInfo, Box<dyn Error>> {
+pub async fn fetch_package_info(
+    name: &str,
+    version: Option<&str>,
+) -> Result<PypiPackageInfo, crate::core::error::WovenError> {
     let url = version.map_or_else(
         || format!("https://pypi.org/pypi/{name}/json"),
         |v| format!("https://pypi.org/pypi/{name}/{v}/json"),
@@ -56,7 +58,7 @@ pub async fn fetch_package_info(name: &str, version: Option<&str>) -> Result<Pyp
     }
 }
 
-pub async fn fetch_full_package_info(name: &str) -> Result<PypiFullInfo, Box<dyn Error>> {
+pub async fn fetch_full_package_info(name: &str) -> Result<PypiFullInfo, crate::core::error::WovenError> {
     let url = format!("https://pypi.org/pypi/{name}/json");
     let response = crate::core::http::CLIENT.get(url).send().await?;
     if response.status().is_success() {
@@ -67,14 +69,14 @@ pub async fn fetch_full_package_info(name: &str) -> Result<PypiFullInfo, Box<dyn
     }
 }
 
-pub async fn download_package(url: &str, dest_path: &Path) -> Result<(), Box<dyn Error>> {
+pub async fn download_package(url: &str, dest_path: &Path) -> Result<(), crate::core::error::WovenError> {
     let response = crate::core::http::CLIENT.get(url).send().await?;
     let content = response.bytes().await?;
     tokio::fs::write(dest_path, content).await?;
     Ok(())
 }
 
-pub fn extract_wheel(wheel_path: &Path, dest_path: &Path) -> Result<(), Box<dyn Error>> {
+pub fn extract_wheel(wheel_path: &Path, dest_path: &Path) -> Result<(), crate::core::error::WovenError> {
     let file = fs::File::open(wheel_path)?;
     let mut archive = ZipArchive::new(file)?;
 
@@ -204,7 +206,11 @@ mod tests {
     }
 }
 
-pub fn generate_scripts(dist_info_path: &Path, scripts_dir: &Path, python_version: &str) -> Result<(), Box<dyn Error>> {
+pub fn generate_scripts(
+    dist_info_path: &Path,
+    scripts_dir: &Path,
+    python_version: &str,
+) -> Result<(), crate::core::error::WovenError> {
     let entry_points_path = dist_info_path.join("entry_points.txt");
     if !entry_points_path.exists() {
         return Ok(());
@@ -285,7 +291,7 @@ export PYTHONPATH=\"$(dirname \"$0\")/../lib/python{python_version}/site-package
     Ok(())
 }
 
-pub fn extract_targz(path: &Path, dest_path: &Path) -> Result<(), Box<dyn Error>> {
+pub fn extract_targz(path: &Path, dest_path: &Path) -> Result<(), crate::core::error::WovenError> {
     let tar_gz = fs::File::open(path)?;
     let tar = GzDecoder::new(tar_gz);
     let mut archive = Archive::new(tar);

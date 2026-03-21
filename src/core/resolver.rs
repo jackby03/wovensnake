@@ -1,7 +1,6 @@
 use pep508_rs::pep440_rs::{Version, VersionSpecifiers};
 use pep508_rs::{Requirement, VerbatimUrl, VersionOrUrl};
 use std::collections::{HashMap, VecDeque};
-use std::error::Error;
 use std::str::FromStr;
 
 use crate::core::marker;
@@ -25,7 +24,7 @@ pub struct DependencyGraph {
 pub async fn resolve(
     root_deps: &HashMap<String, String>,
     python_version: &str,
-) -> Result<DependencyGraph, Box<dyn Error>> {
+) -> Result<DependencyGraph, crate::core::error::WovenError> {
     let mut resolved = HashMap::<String, ResolutionNode>::new();
     let mut queue = VecDeque::<(String, Option<String>)>::new();
     let marker_env = marker::build_marker_environment(python_version)?;

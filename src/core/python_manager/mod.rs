@@ -1,7 +1,6 @@
 pub mod downloader;
 pub mod metadata;
 
-use std::error::Error;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -9,7 +8,7 @@ use downloader::download_and_extract_python;
 
 /// Ensures that a specific Python version is available.
 /// If not found locally in the managed directory, it downloads it.
-pub async fn ensure_python_version(version: &str) -> Result<PathBuf, Box<dyn Error>> {
+pub async fn ensure_python_version(version: &str) -> Result<PathBuf, crate::core::error::WovenError> {
     let managed_path = get_managed_python_path(version)?;
 
     // Try to find the executable in common locations within the managed path
@@ -56,14 +55,14 @@ fn find_executable_in_managed_path(managed_path: &Path) -> Option<PathBuf> {
     candidates.into_iter().find(|candidate| candidate.exists())
 }
 
-fn get_managed_python_path(version: &str) -> Result<PathBuf, Box<dyn Error>> {
+fn get_managed_python_path(version: &str) -> Result<PathBuf, crate::core::error::WovenError> {
     let home = dirs::home_dir().ok_or("Could not find home directory")?;
     let managed_base = home.join(".woven").join("python");
     Ok(managed_base.join(version))
 }
 
 /// Lists all Python versions currently managed by `WovenSnake`.
-pub fn list_managed_versions() -> Result<Vec<String>, Box<dyn Error>> {
+pub fn list_managed_versions() -> Result<Vec<String>, crate::core::error::WovenError> {
     let home = dirs::home_dir().ok_or("Could not find home directory")?;
     let managed_base = home.join(".woven").join("python");
 
@@ -84,7 +83,7 @@ pub fn list_managed_versions() -> Result<Vec<String>, Box<dyn Error>> {
 }
 
 /// Removes a specific managed Python version.
-pub fn remove_managed_version(version: &str) -> Result<(), Box<dyn Error>> {
+pub fn remove_managed_version(version: &str) -> Result<(), crate::core::error::WovenError> {
     let managed_path = get_managed_python_path(version)?;
     if managed_path.exists() {
         fs::remove_dir_all(managed_path)?;
@@ -93,7 +92,7 @@ pub fn remove_managed_version(version: &str) -> Result<(), Box<dyn Error>> {
 }
 
 /// Removes all managed Python versions.
-pub fn clear_managed_versions() -> Result<(), Box<dyn Error>> {
+pub fn clear_managed_versions() -> Result<(), crate::core::error::WovenError> {
     let home = dirs::home_dir().ok_or("Could not find home directory")?;
     let managed_base = home.join(".woven").join("python");
     if managed_base.exists() {
