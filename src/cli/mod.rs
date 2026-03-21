@@ -3,6 +3,7 @@ pub mod clean;
 pub mod init;
 pub mod install;
 pub mod list;
+pub mod progress;
 pub mod remove;
 pub mod run;
 pub mod self_uninstall;
