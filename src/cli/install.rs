@@ -243,18 +243,27 @@ async fn install_from_lock(
                         if let Err(e) = cache.save(&artifact.filename, &artifact.sha256, &data) {
                             pb.println(format!("\x1b[33m⚠ Warning:\x1b[0m {name}: cache save failed ({e})"));
                         }
-                        if let Err(e) = std::fs::write(&dest_path, &data) {
+                        if let Err(e) = tokio::fs::write(&dest_path, &data).await {
                             pb.finish_with_message(format!("\x1b[31m✗\x1b[0m {name}: write failed ({e})"));
                             return;
                         }
                     }
 
                     let is_wheel = artifact.filename.to_lowercase().ends_with(".whl");
-                    let extract_result = if is_wheel {
-                        package::extract_wheel(&dest_path, &site_packages)
-                    } else {
-                        package::extract_targz(&dest_path, &site_packages)
-                    };
+                    let dest_path_clone = dest_path.clone();
+                    let site_packages_clone = site_packages.clone();
+
+                    let extract_result = tokio::task::spawn_blocking(move || {
+                        let res = if is_wheel {
+                            package::extract_wheel(&dest_path_clone, &site_packages_clone)
+                        } else {
+                            package::extract_targz(&dest_path_clone, &site_packages_clone)
+                        };
+                        res.map_err(|e| e.to_string())
+                    })
+                    .await
+                    .unwrap_or_else(|e| Err(format!("Task joined failed: {e}")));
+
                     if let Err(e) = extract_result {
                         pb.finish_with_message(format!("\x1b[31m✗\x1b[0m {name}: extract failed ({e})"));
                         return;
@@ -345,7 +354,7 @@ async fn resolve_and_install_final(
                 if !cache.contains(&pkg_url.filename, &pkg_url.sha256) && !dest_path.exists() {
                     pb.set_message(format!("Downloading: {}", node.name));
                     package::download_package(&pkg_url.url, &dest_path).await?;
-                    let data = std::fs::read(&dest_path)?;
+                    let data = tokio::fs::read(&dest_path).await?;
                     if let Err(e) = cache.save(&pkg_url.filename, &pkg_url.sha256, &data) {
                         ux::print_warning(format!("Cache save failed for {}: {e}", node.name));
                     }
@@ -357,10 +366,22 @@ async fn resolve_and_install_final(
 
                 pb.set_message(format!("Installing: {}", node.name));
                 let is_wheel = pkg_url.filename.to_lowercase().ends_with(".whl");
-                if is_wheel {
-                    package::extract_wheel(&dest_path, site_packages)?;
-                } else {
-                    package::extract_targz(&dest_path, site_packages)?;
+                let dest_path_clone = dest_path.clone();
+                let site_packages_clone = site_packages.to_path_buf();
+
+                let ext_res = tokio::task::spawn_blocking(move || {
+                    let res = if is_wheel {
+                        package::extract_wheel(&dest_path_clone, &site_packages_clone)
+                    } else {
+                        package::extract_targz(&dest_path_clone, &site_packages_clone)
+                    };
+                    res.map_err(|e| e.to_string())
+                })
+                .await
+                .unwrap_or_else(|e| Err(format!("Task joined failed: {e}")));
+
+                if let Err(e) = ext_res {
+                    ux::print_warning(format!("Extract failed for {}: {e}", node.name));
                 }
                 if is_wheel {
                     if let Some(dist_info) = find_dist_info(site_packages, &node.name) {
