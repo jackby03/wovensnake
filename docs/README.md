@@ -8,7 +8,7 @@
 [![CI Status](https://github.com/jackby03/wovensnake/workflows/Development%20CI/badge.svg?style=flat-square)](https://github.com/jackby03/wovensnake/actions)
 [![License](https://img.shields.io/crates/l/wovensnake.svg?style=flat-square)](https://github.com/jackby03/wovensnake/blob/main/LICENSE)
 [![Ko-Fi](https://img.shields.io/badge/Ko--fi-Fba8a8?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/jackby03)
-
+[![ACS compatible](https://img.shields.io/badge/ACS-compatible%20v1.0-4CAF50?style=flat-square)](https://acs.jackby03.com)
 > **"Dependencies, neatly woven."** 🐍🧶
 
 **WovenSnake** is a cozy, high-performance Python package manager built with **Rust**. It knits your dependencies together securely, keeping your environment warm and tidy.

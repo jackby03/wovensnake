@@ -6,15 +6,23 @@ on:
     paths:
       - "src/**"
       - "tests/**"
+      - "scripts/**"
       - "Cargo.toml"
       - "Cargo.lock"
+      - ".github/workflows/**"
+      - "clippy.toml"
+      - ".rustfmt.toml"
   pull_request:
     branches: [main]
     paths:
       - "src/**"
       - "tests/**"
+      - "scripts/**"
       - "Cargo.toml"
       - "Cargo.lock"
+      - ".github/workflows/**"
+      - "clippy.toml"
+      - ".rustfmt.toml"
   workflow_dispatch:
 
 env:
