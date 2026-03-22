@@ -54,19 +54,41 @@ pub async fn resolve(
             continue;
         }
 
-        // Fetch package info.
-        // PyPI versioned API (/{name}/{version}/json) only accepts exact versions.
-        // Range specifiers like ">=2,<4" or "~=3.1" must be fetched as latest (/json),
-        // then the constraint is enforced by the caller.
-        let fetch_version = version_constraint.as_deref().and_then(|v| {
-            let trimmed = v.trim_start_matches("==");
-            if trimmed.chars().next().is_some_and(|c| c.is_ascii_digit()) {
-                Some(trimmed)
-            } else {
-                None // range specifier → fetch latest
+        // Determine which version to fetch from PyPI:
+        //   1. Exact specifier (==x.y.z)  → fetch the versioned endpoint directly.
+        //   2. Range/inequality specifier  → enumerate all releases, select the
+        //      highest version that satisfies all constraints (PEP440), then fetch
+        //      that specific version.
+        //   3. No constraint               → fetch the latest release endpoint.
+        let fetch_version: Option<String> = match version_constraint.as_deref() {
+            None | Some("") => None,
+            Some(constraint_str) => {
+                // Try to interpret as a bare exact version like "1.2.3"
+                let trimmed = constraint_str.trim_start_matches("==");
+                if trimmed.chars().next().is_some_and(|c| c.is_ascii_digit()) {
+                    Some(trimmed.to_string())
+                } else {
+                    // Range / inequality specifier: find the best satisfying version.
+                    match VersionSpecifiers::from_str(constraint_str) {
+                        Ok(specifiers) => {
+                            let full = package::fetch_full_package_info(&name).await?;
+                            match package::select_best_candidate(&full.releases, &specifiers) {
+                                Some(best) => Some(best),
+                                None => {
+                                    return Err(format!(
+                                        "No version of '{name}' satisfies constraint '{constraint_str}'"
+                                    )
+                                    .into())
+                                }
+                            }
+                        }
+                        Err(_) => None, // malformed specifier → fall back to latest
+                    }
+                }
             }
-        });
-        let info = package::fetch_package_info(&name, fetch_version).await?;
+        };
+
+        let info = package::fetch_package_info(&name, fetch_version.as_deref()).await?;
         // The info object is consumed directly below
         let mut sub_deps = Vec::new();
 
