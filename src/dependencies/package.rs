@@ -1,8 +1,11 @@
 use flate2::read::GzDecoder;
+use pep508_rs::pep440_rs::{Version, VersionSpecifiers};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fs;
 use std::io;
 use std::path::Path;
+use std::str::FromStr;
 use tar::Archive;
 use zip::ZipArchive;
 
@@ -67,6 +70,29 @@ pub async fn fetch_full_package_info(name: &str) -> Result<PypiFullInfo, crate::
     } else {
         Err(format!("Could not find package {name} on PyPI").into())
     }
+}
+
+/// Selects the best (highest) version from a `PyPI` releases map that satisfies
+/// all provided PEP440 `specifiers`. Pre-release versions are skipped unless
+/// no stable version satisfies the constraints.
+///
+/// Returns `None` if no release satisfies the specifiers.
+pub fn select_best_candidate<S: ::std::hash::BuildHasher>(
+    releases: &HashMap<String, Vec<PackageUrl>, S>,
+    specifiers: &VersionSpecifiers,
+) -> Option<String> {
+    let candidates: Vec<Version> = releases
+        .keys()
+        .filter_map(|k| Version::from_str(k).ok())
+        .filter(|v| specifiers.contains(v))
+        .collect();
+
+    // Prefer stable over pre-release; fall back to pre-release only if nothing stable.
+    let stable: Vec<Version> = candidates.iter().filter(|v| !v.any_prerelease()).cloned().collect();
+
+    let pool = if stable.is_empty() { &candidates } else { &stable };
+
+    pool.iter().max().map(Version::to_string)
 }
 
 pub async fn download_package(url: &str, dest_path: &Path) -> Result<(), crate::core::error::WovenError> {

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use wovensnake::core::config::Config;
 use wovensnake::core::lock::Artifact;
 use wovensnake::core::selection::select_artifact;
+use wovensnake::dependencies::package::{select_best_candidate, Digests, PackageUrl};
 
 #[test]
 fn test_config_model() {
@@ -99,4 +100,76 @@ fn test_select_artifact_linux_aarch64_no_fallback_to_x86_64_when_no_any() {
         result.is_none(),
         "should not select an incompatible x86_64 wheel on aarch64"
     );
+}
+
+// ── PEP440 candidate-selection unit tests ────────────────────────────────────
+
+/// Build a synthetic releases map from a list of version strings.
+/// URLs are empty because select_best_candidate only examines the map keys.
+fn make_releases(versions: &[&str]) -> HashMap<String, Vec<wovensnake::dependencies::package::PackageUrl>> {
+    use wovensnake::dependencies::package::{Digests, PackageUrl};
+    versions
+        .iter()
+        .map(|v| {
+            let url = PackageUrl {
+                url: format!("https://files.example.com/{v}.whl"),
+                filename: format!("{v}.whl"),
+                packagetype: "bdist_wheel".to_string(),
+                digests: Digests {
+                    sha256: "deadbeef".to_string(),
+                },
+            };
+            (v.to_string(), vec![url])
+        })
+        .collect()
+}
+
+#[test]
+fn test_pep440_exact() {
+    use std::str::FromStr;
+    let releases = make_releases(&["1.2.2", "1.2.3", "1.3.0"]);
+    let specs = pep508_rs::pep440_rs::VersionSpecifiers::from_str("==1.2.3").unwrap();
+    assert_eq!(select_best_candidate(&releases, &specs).as_deref(), Some("1.2.3"));
+}
+
+#[test]
+fn test_pep440_range() {
+    use std::str::FromStr;
+    let releases = make_releases(&["0.9", "1.0", "1.5", "2.0"]);
+    let specs = pep508_rs::pep440_rs::VersionSpecifiers::from_str(">=1.0,<2.0").unwrap();
+    assert_eq!(select_best_candidate(&releases, &specs).as_deref(), Some("1.5"));
+}
+
+#[test]
+fn test_pep440_tilde_equal() {
+    use std::str::FromStr;
+    // ~=1.4 means >=1.4, <2.0
+    let releases = make_releases(&["1.3", "1.4", "1.5", "2.0"]);
+    let specs = pep508_rs::pep440_rs::VersionSpecifiers::from_str("~=1.4").unwrap();
+    assert_eq!(select_best_candidate(&releases, &specs).as_deref(), Some("1.5"));
+}
+
+#[test]
+fn test_pep440_not_equal() {
+    use std::str::FromStr;
+    let releases = make_releases(&["1.0", "1.4", "1.5", "1.6"]);
+    let specs = pep508_rs::pep440_rs::VersionSpecifiers::from_str("!=1.5,>=1.0").unwrap();
+    assert_eq!(select_best_candidate(&releases, &specs).as_deref(), Some("1.6"));
+}
+
+#[test]
+fn test_pep440_no_match_returns_none() {
+    use std::str::FromStr;
+    let releases = make_releases(&["1.0", "2.0"]);
+    let specs = pep508_rs::pep440_rs::VersionSpecifiers::from_str(">=99.0").unwrap();
+    assert!(select_best_candidate(&releases, &specs).is_none());
+}
+
+#[test]
+fn test_pep440_prerelease_skipped_when_stable_exists() {
+    use std::str::FromStr;
+    let releases = make_releases(&["1.0", "2.0a1"]);
+    let specs = pep508_rs::pep440_rs::VersionSpecifiers::from_str(">=1.0").unwrap();
+    // 2.0a1 satisfies >=1.0 but is pre-release; 1.0 is stable and should win.
+    assert_eq!(select_best_candidate(&releases, &specs).as_deref(), Some("1.0"));
 }
